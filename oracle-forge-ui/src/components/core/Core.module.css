@@ -1,0 +1,18 @@
+.navbar {
+    margin-bottom: 2em;
+    display: flex;
+    gap: 1.5em;
+    background: #1a1a1a;
+    padding: 1em;
+    border-bottom: 1px solid #333;
+  }
+  
+  .navbar a {
+    color: #6b46c1;
+    text-decoration: none;
+    font-weight: bold;
+  }
+  
+  .navbar a:hover {
+    text-decoration: underline;
+  }

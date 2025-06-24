@@ -1,0 +1,111 @@
+# Python
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.so
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# PyInstaller
+*.manifest
+*.spec
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+.hypothesis/
+.pytest_cache/
+
+# Environments
+.env
+.venv/
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# IDEs
+.idea/
+.vscode/
+*.swp
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Node
+oracle-forge-ui/node_modules/
+oracle-forge-ui/dist/
+oracle-forge-ui/.pnp
+oracle-forge-ui/.pnp.js
+oracle-forge-ui/coverage/
+oracle-forge-ui/build/
+
+# npm
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Project specific
+# Models can be large
+models/
+
+# Logs and state
+server/state/
+*.log
+
+# Vault data is currently proprietary. (Will update with example vault that will bypass gitignore)
+vault/
+
+# Ignore llama.cpp source
+llama.cpp/
+
+# Personal notes
+.notes.txt
+
+# Temp files
+*.tmp
+
+# Azgaar fantasy map
+server/azgaar/
+
+scripts/pdf_to_markdown_scripts/
+config/
+oracle-forge-ui/src/config.js
