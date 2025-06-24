@@ -161,3 +161,43 @@ def get_character(character_name):
         "success": True,
         "character": character_data
     })
+
+@session.route("/session/character/<character_name>", methods=["PUT"])
+def update_character(character_name):
+    adv = get_active_adventure()
+    if not adv:
+        return jsonify({"error": "No active adventure"}), 400
+
+    # Load player states to find the character file
+    player_states_path = os.path.join(BASE_DIR, adv, "player_states.yaml")
+    player_states = load_yaml(player_states_path)
+    players = player_states.get("players", [])
+    
+    # Find the character file that matches the name
+    character_file = None
+    for filename in players:
+        if filename.endswith('.yaml'):
+            char_path = os.path.join(BASE_DIR, adv, "players", filename)
+            char_data = load_yaml(char_path)
+            if char_data.get("name") == character_name:
+                character_file = filename
+                break
+    
+    if not character_file:
+        return jsonify({"error": "Character not found"}), 404
+    
+    # Load current character data
+    character_path = os.path.join(BASE_DIR, adv, "players", character_file)
+    character_data = load_yaml(character_path)
+    
+    # Update with new data from request
+    update_data = request.json.get("character", {})
+    character_data.update(update_data)
+    
+    # Save updated character
+    write_yaml(character_path, character_data)
+    
+    return jsonify({
+        "success": True,
+        "character": character_data
+    })
