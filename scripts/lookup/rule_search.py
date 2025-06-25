@@ -2,7 +2,7 @@ import os
 import argparse
 import yaml
 
-VAULT_PATH = "vault/rules/"
+VAULT_PATH = "vault/lookup/rules/"
 
 def parse_frontmatter(text):
     if text.startswith('---'):

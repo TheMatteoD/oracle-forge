@@ -23,7 +23,7 @@ def load_player_combat_data(path):
 
 
 def load_monster_data(monster_names):
-    with open("vault/tables/monsters.yaml", 'r') as f:
+    with open("vault/lookup/monsters/monsters.yaml", 'r') as f:
         monsters = yaml.safe_load(f)["entries"]
 
     enemies = []

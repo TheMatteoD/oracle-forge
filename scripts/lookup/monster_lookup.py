@@ -2,8 +2,12 @@ import yaml
 import json
 import argparse
 import random
+import sys
+import os
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from llm.flavoring import narrate_monsters
 
-def load_monsters(path="vault/tables/monsters.yaml"):
+def load_monsters(path="vault/lookup/monsters/monsters.yaml"):
     with open(path, "r") as f:
         data = yaml.safe_load(f)
     return data["entries"]
@@ -15,6 +19,13 @@ def find_monster(name_query, monsters):
         if name_query in m.get("name", "").lower()
     ]
 
+def get_random_monsters(monsters, count=1):
+    """Get a random selection of monsters from the provided list."""
+    if not monsters:
+        return []
+    
+    count = min(count, len(monsters))
+    return random.sample(monsters, count)
 
 def roll_number_appearing(monster):
     import re
@@ -72,6 +83,11 @@ if __name__ == "__main__":
     parser.add_argument("--json", action="store_true", help="Return results in JSON")
     parser.add_argument("--system", type=str, help="Filter by system (e.g., OSE:AF)")
     parser.add_argument("--tag", type=str, help="Filter by tag (e.g., undead, humanoid)")
+    parser.add_argument("--random", type=int, help="Get N random monsters from filtered results")
+    parser.add_argument("--environment", type=str, help="Apply environmental flavoring (e.g., forest, desert, mountain)")
+    parser.add_argument("--theme", type=str, help="Apply thematic flavoring (e.g., elven, dwarven, orcish)")
+    parser.add_argument("--context", type=str, help="Player context for flavoring")
+    parser.add_argument("--narrate", action="store_true", help="Generate LLM narration for results")
 
     args = parser.parse_args()
 
@@ -94,11 +110,25 @@ if __name__ == "__main__":
             if any(tag_query in t.lower() for t in m.get("tags", []))
         ]
 
-
+    # Apply random selection if requested
+    if args.random and args.random > 0:
+        matches = get_random_monsters(matches, args.random)
 
     if not matches:
         print("No match found.")
     else:
+        if args.narrate:
+            # Generate LLM narration
+            narration = narrate_monsters(
+                matches, 
+                context=args.context,
+                environment=args.environment, 
+                theme=args.theme
+            )
+            print("=== LLM Narration ===")
+            print(narration)
+            print("\n=== Raw Data ===")
+        
         if args.json:
             print(json.dumps([display_monster(m, as_json=True) for m in matches], indent=2))
         else:
