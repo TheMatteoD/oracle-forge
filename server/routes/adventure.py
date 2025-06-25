@@ -1,11 +1,17 @@
 from flask import Blueprint, send_from_directory, jsonify, request, send_file
 import os
 import yaml
+from werkzeug.utils import secure_filename
 
 adventure = Blueprint('adventure', __name__)
 
 ADVENTURE_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "vault", "logs"))
 ACTIVE_PATH = os.path.join("server", "state", "active_adventure.txt")
+
+ALLOWED_IMAGE_EXTENSIONS = {"png", "jpg", "jpeg"}
+
+def allowed_image(filename):
+    return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_IMAGE_EXTENSIONS
 
 @adventure.route("/adventures/list", methods=["GET"])
 def list_adventures():
@@ -112,3 +118,34 @@ def get_map_file(adv):
         return jsonify({"error": "Map file not found"}), 404
     print("Map found at ", map_path)
     return send_file(map_path, as_attachment=True)
+
+# --- Custom Map Image Endpoints ---
+
+@adventure.route("/adventures/<adv>/upload_custom_map", methods=["POST"])
+def upload_custom_map(adv):
+    if 'file' not in request.files:
+        return jsonify({"error": "No file uploaded"}), 400
+    file = request.files['file']
+    if not allowed_image(file.filename):
+        return jsonify({"error": "Invalid file type"}), 400
+    map_dir = os.path.join(ADVENTURE_ROOT, adv, "world", "custom_maps")
+    os.makedirs(map_dir, exist_ok=True)
+    filename = secure_filename(file.filename)
+    save_path = os.path.join(map_dir, filename)
+    file.save(save_path)
+    return jsonify({"success": True, "filename": filename})
+
+@adventure.route("/adventures/<adv>/custom_maps", methods=["GET"])
+def list_custom_maps(adv):
+    map_dir = os.path.join(ADVENTURE_ROOT, adv, "world", "custom_maps")
+    if not os.path.exists(map_dir):
+        return jsonify([])
+    files = [f for f in os.listdir(map_dir) if allowed_image(f)]
+    return jsonify(files)
+
+@adventure.route("/adventures/<adv>/custom_maps/<filename>", methods=["GET"])
+def serve_custom_map(adv, filename):
+    map_dir = os.path.join(ADVENTURE_ROOT, adv, "world", "custom_maps")
+    if not allowed_image(filename):
+        return jsonify({"error": "Invalid file type"}), 400
+    return send_from_directory(map_dir, filename)
