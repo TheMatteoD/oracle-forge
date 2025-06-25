@@ -55,6 +55,17 @@ def init_adventure_structure(adventure_name):
         if not os.path.exists(full_path):
             with open(full_path, "w") as f:
                 yaml.dump(content, f)
+    
+    # Initialize first session file
+    session_file = os.path.join(base_path, "sessions", "session_01.yaml")
+    if not os.path.exists(session_file):
+        with open(session_file, "w") as f:
+            yaml.dump({
+                "session_id": "session_01",
+                "adventure": adventure_name,
+                "log": [],
+                "phase": "start"
+            }, f)
 
 
 @adventure.route("/adventures/select/<adventure>", methods=["POST"])

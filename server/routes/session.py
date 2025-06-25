@@ -246,15 +246,42 @@ def end_session():
     file = get_session_file(adv)
     if not file:
         return jsonify({"error": "No session log found"}), 404
+
     data = load_yaml(file)
     log = data.get("log", [])
+
     try:
         summary = summarize_session_log(log)
     except Exception as e:
         return jsonify({"error": f"LLM summarization failed: {e}"}), 500
+
     md_path = file.replace('.yaml', '.md')
     with open(md_path, 'w') as f:
         f.write(f"# Session Summary\n\n{summary}\n\n---\n\n## Full Log\n\n")
         for entry in log:
             f.write(f"- [{entry.get('timestamp', '')}] [{entry.get('type', '')}] {entry.get('content', '')}\n")
-    return jsonify({"success": True, "summary": summary})
+
+    sessions_dir = os.path.join(BASE_DIR, adv, "sessions")
+    os.makedirs(sessions_dir, exist_ok=True)
+    existing = glob.glob(os.path.join(sessions_dir, "session_*.yaml"))
+    next_id = len(existing) + 1
+    next_filename = f"session_{next_id:02d}.yaml"
+    next_path = os.path.join(sessions_dir, next_filename)
+    with open(next_path, "w") as f:
+        yaml.dump({
+            "session_id": next_filename.replace(".yaml", ""),
+            "adventure": adv,
+            "log": [],
+            "phase": "start"
+        }, f)
+
+    active_path = os.path.join(BASE_DIR, adv, "active_session.yaml")
+    write_yaml(active_path, {
+        "session_id": next_filename.replace(".yaml", ""),
+        "adventure": adv,
+        "log": [],
+        "phase": "start"
+    })
+
+    return jsonify({"success": True, "summary": summary, "next_session": next_filename})
+
