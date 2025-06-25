@@ -447,9 +447,9 @@ export default function WorldSummary({ adventure }) {
       <NPCsSection adventure={adventure} />
 
       <div className="mt-3">
-        <h4 className="font-semibold">Threads</h4>
+        <h4 className="font-semibold">Story Lines</h4>
         <ul className="text-sm list-disc ml-5">
-          {(world.threads || []).map((t, i) => (
+          {(world.story_lines || []).map((t, i) => (
             <li key={i}>{t.name} ({t.status})</li>
           ))}
         </ul>

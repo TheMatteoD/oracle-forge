@@ -43,6 +43,7 @@ def build_adventure_context(adventure_name):
     npcs = load_entity("npcs")
     factions = load_entity("factions")
     locations = load_entity("locations")
+    story_lines = load_entity("story_lines")
 
     return {
         "session": session_data,
@@ -50,5 +51,6 @@ def build_adventure_context(adventure_name):
         "players": players,
         "npcs": npcs,
         "factions": factions,
-        "locations": locations
+        "locations": locations,
+        "story_lines": story_lines
     }

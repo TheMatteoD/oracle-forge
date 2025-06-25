@@ -28,6 +28,7 @@ def init_adventure_structure(adventure_name):
     os.makedirs(os.path.join(base_path, "world", "locations"), exist_ok=True)
     os.makedirs(os.path.join(base_path, "world", "factions"), exist_ok=True)
     os.makedirs(os.path.join(base_path, "world", "npcs"), exist_ok=True)
+    os.makedirs(os.path.join(base_path, "world", "story_lines"), exist_ok=True)
     os.makedirs(os.path.join(base_path, "sessions"), exist_ok=True)
 
     # Init files
@@ -39,7 +40,7 @@ def init_adventure_structure(adventure_name):
             "preferred_rule_system": "Oracle Forge",
             "locations": [],
             "factions": [],
-            "threads": []
+            "story_lines": []
         },
         "player_states.yaml": { "players": [] },
         "active_session.yaml": {
