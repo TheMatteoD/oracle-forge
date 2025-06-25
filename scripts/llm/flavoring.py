@@ -78,3 +78,8 @@ Narrate a vivid, immersive, and flavorful version of this result that fits the c
 """
     response = llm(prompt, max_tokens=500)
     return response["choices"][0]["text"].strip()
+
+def summarize_session_log_llm(prompt):
+    llm = get_llm()
+    response = llm(prompt, max_tokens=800)
+    return response["choices"][0]["text"].strip()

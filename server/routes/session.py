@@ -3,10 +3,12 @@ import os
 import yaml
 from datetime import datetime
 import re
+import glob
+from scripts.llm.flavoring import summarize_session_log_llm
 
 session = Blueprint("session", __name__)
 
-BASE_DIR = os.path.join("vault", "logs")
+BASE_DIR = os.path.join("vault", "adventures")
 STATE_DIR = "server/state"
 ACTIVE_FILE = os.path.join(STATE_DIR, "active_adventure.txt")
 
@@ -32,6 +34,19 @@ def sanitize_filename(name):
     safe_name = re.sub(r'[^a-zA-Z0-9\s]', '', name)
     safe_name = re.sub(r'\s+', '_', safe_name).lower()
     return safe_name
+
+def get_session_file(adv, session_id=None):
+    sessions_dir = os.path.join(BASE_DIR, adv, "sessions")
+    if not os.path.exists(sessions_dir):
+        return None
+    if session_id:
+        file = os.path.join(sessions_dir, f"{session_id}.yaml")
+        if os.path.exists(file):
+            return file
+        return None
+    # If no session_id, return the latest session file (by name)
+    files = sorted(glob.glob(os.path.join(sessions_dir, "session_*.yaml")))
+    return files[-1] if files else None
 
 @session.route("/session/character", methods=["POST"])
 def create_character():
@@ -105,29 +120,41 @@ def session_state():
         "combat_log": session_data.get("combat_log", [])
     })
 
-@session.route("/session/log", methods=["POST"])
-def add_log_entry():
+@session.route("/session/log", methods=["GET"])
+def get_session_log():
     adv = get_active_adventure()
     if not adv:
         return jsonify({"error": "No active adventure"}), 400
+    file = get_session_file(adv)
+    if not file:
+        return jsonify({"error": "No session log found"}), 404
+    data = load_yaml(file)
+    log = data.get("log", [])
+    return jsonify(log)
 
-    entry = request.json.get("entry", "").strip()
-    entry_type = request.json.get("type", "combat")  # default type
-
-    if not entry:
+@session.route("/session/log", methods=["POST"])
+def append_session_log():
+    adv = get_active_adventure()
+    if not adv:
+        return jsonify({"error": "No active adventure"}), 400
+    entry = request.json
+    if not entry or not entry.get("content"):
         return jsonify({"error": "Empty log entry"}), 400
-
-    path = os.path.join(BASE_DIR, adv, "active_session.yaml")
-    session_data = load_yaml(path)
-    log = session_data.get("combat_log", [])
-
-    timestamp = datetime.now().strftime("[%H:%M] ")
-    log.append(timestamp + entry)
-
-    session_data["combat_log"] = log
-    write_yaml(path, session_data)
-
-    return jsonify({"success": True, "entry": entry})
+    file = get_session_file(adv)
+    if not file:
+        return jsonify({"error": "No session log found"}), 404
+    data = load_yaml(file)
+    log = data.get("log", [])
+    from datetime import datetime
+    entry_obj = {
+        "timestamp": entry.get("timestamp") or datetime.now().isoformat(),
+        "type": entry.get("type", "custom"),
+        "content": entry["content"]
+    }
+    log.append(entry_obj)
+    data["log"] = log
+    write_yaml(file, data)
+    return jsonify({"success": True, "entry": entry_obj})
 
 @session.route("/session/character/<character_name>", methods=["GET"])
 def get_character(character_name):
@@ -201,3 +228,33 @@ def update_character(character_name):
         "success": True,
         "character": character_data
     })
+
+def summarize_session_log(log):
+    prompt = (
+        "Summarize the following RPG session log concisely as a narrative, with no additions or embellishments. " +
+        "Your response should be as retelling the counts or telling it as a story, meaning use full sentences, no lists, and explain what happened. " +
+        "Use only the information provided.\n\nSession Log:\n" +
+        "\n".join(f"[{entry.get('timestamp', '')}] [{entry.get('type', '')}] {entry.get('content', '')}" for entry in log)
+    )
+    return summarize_session_log_llm(prompt)
+
+@session.route("/session/end", methods=["POST"])
+def end_session():
+    adv = get_active_adventure()
+    if not adv:
+        return jsonify({"error": "No active adventure"}), 400
+    file = get_session_file(adv)
+    if not file:
+        return jsonify({"error": "No session log found"}), 404
+    data = load_yaml(file)
+    log = data.get("log", [])
+    try:
+        summary = summarize_session_log(log)
+    except Exception as e:
+        return jsonify({"error": f"LLM summarization failed: {e}"}), 500
+    md_path = file.replace('.yaml', '.md')
+    with open(md_path, 'w') as f:
+        f.write(f"# Session Summary\n\n{summary}\n\n---\n\n## Full Log\n\n")
+        for entry in log:
+            f.write(f"- [{entry.get('timestamp', '')}] [{entry.get('type', '')}] {entry.get('content', '')}\n")
+    return jsonify({"success": True, "summary": summary})

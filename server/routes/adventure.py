@@ -2,10 +2,11 @@ from flask import Blueprint, send_from_directory, jsonify, request, send_file
 import os
 import yaml
 from werkzeug.utils import secure_filename
+import glob
 
 adventure = Blueprint('adventure', __name__)
 
-ADVENTURE_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "vault", "logs"))
+ADVENTURE_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "vault", "adventures"))
 ACTIVE_PATH = os.path.join("server", "state", "active_adventure.txt")
 
 ALLOWED_IMAGE_EXTENSIONS = {"png", "jpg", "jpeg"}
@@ -149,3 +150,71 @@ def serve_custom_map(adv, filename):
     if not allowed_image(filename):
         return jsonify({"error": "Invalid file type"}), 400
     return send_from_directory(map_dir, filename)
+
+# --- World State Endpoints ---
+
+@adventure.route("/adventures/<adv>/world_state", methods=["GET"])
+def get_world_state(adv):
+    path = os.path.join(ADVENTURE_ROOT, adv, "world_state.yaml")
+    if not os.path.exists(path):
+        return jsonify({"error": "World state not found"}), 404
+    with open(path, "r") as f:
+        data = yaml.safe_load(f) or {}
+    return jsonify(data)
+
+@adventure.route("/adventures/<adv>/world_state", methods=["POST"])
+def update_world_state(adv):
+    path = os.path.join(ADVENTURE_ROOT, adv, "world_state.yaml")
+    data = request.json
+    with open(path, "w") as f:
+        yaml.dump(data, f)
+    return jsonify({"success": True})
+
+# --- World Entity CRUD Endpoints ---
+
+ENTITY_TYPES = ["npcs", "factions", "locations", "story_lines"]
+
+@adventure.route("/adventures/<adv>/world/<entity_type>", methods=["GET"])
+def list_entities(adv, entity_type):
+    if entity_type not in ENTITY_TYPES:
+        return jsonify({"error": "Invalid entity type"}), 400
+    folder = os.path.join(ADVENTURE_ROOT, adv, "world", entity_type)
+    if not os.path.exists(folder):
+        return jsonify([])
+    files = glob.glob(os.path.join(folder, "*.yaml"))
+    entities = []
+    for file in files:
+        with open(file, "r") as f:
+            entities.append(yaml.safe_load(f))
+    return jsonify(entities)
+
+@adventure.route("/adventures/<adv>/world/<entity_type>/<entity_name>", methods=["GET"])
+def get_entity(adv, entity_type, entity_name):
+    if entity_type not in ENTITY_TYPES:
+        return jsonify({"error": "Invalid entity type"}), 400
+    file = os.path.join(ADVENTURE_ROOT, adv, "world", entity_type, f"{entity_name}.yaml")
+    if not os.path.exists(file):
+        return jsonify({"error": "Entity not found"}), 404
+    with open(file, "r") as f:
+        data = yaml.safe_load(f)
+    return jsonify(data)
+
+@adventure.route("/adventures/<adv>/world/<entity_type>/<entity_name>", methods=["POST"])
+def create_or_update_entity(adv, entity_type, entity_name):
+    if entity_type not in ENTITY_TYPES:
+        return jsonify({"error": "Invalid entity type"}), 400
+    file = os.path.join(ADVENTURE_ROOT, adv, "world", entity_type, f"{entity_name}.yaml")
+    data = request.json
+    with open(file, "w") as f:
+        yaml.dump(data, f)
+    return jsonify({"success": True})
+
+@adventure.route("/adventures/<adv>/world/<entity_type>/<entity_name>", methods=["DELETE"])
+def delete_entity(adv, entity_type, entity_name):
+    if entity_type not in ENTITY_TYPES:
+        return jsonify({"error": "Invalid entity type"}), 400
+    file = os.path.join(ADVENTURE_ROOT, adv, "world", entity_type, f"{entity_name}.yaml")
+    if not os.path.exists(file):
+        return jsonify({"error": "Entity not found"}), 404
+    os.remove(file)
+    return jsonify({"success": True})

@@ -6,7 +6,7 @@ combat_bp = Blueprint("combat", __name__)
 @combat_bp.route("/combat/start", methods=["POST"])
 def start_combat():
     data = request.get_json()
-    players = combat.load_player_combat_data("vault/logs/adventure01/player_states.yaml")
+    players = combat.load_player_combat_data("vault/adventures/adventure01/player_states.yaml")
     enemies = combat.load_monster_data(data.get("monsters", []))
 
     initiative_order = combat.roll_initiative(players + enemies)
