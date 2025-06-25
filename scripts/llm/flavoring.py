@@ -1,8 +1,10 @@
 from scripts.llm.llm_loader import get_llm
 
-def narrate_yesno(question, result, **kwargs):
+def narrate_yesno(question, result, context=None, **kwargs):
     llm = get_llm()
 
+    print("Context for LLM: ")
+    print(context)
 
     prompt = f"""
 You are the dungeon master in a fantasy TTRPG.
@@ -12,11 +14,12 @@ With a normal yes or no, you would be excpected to keep answers relatively short
 When there is an exceptional result the answer should take the yes and approach, or the no and approach, and add onto the result taking it a step further.
 Question: {question}
 Answer: {result}
+Adventure context: {context}
 """
     response = llm(prompt, max_tokens=500)
     return response["choices"][0]["text"].strip()
 
-def narrate_event_interrupt(focus=None, expectation=None):
+def narrate_event_interrupt(focus=None, expectation=None, context=None):
     llm = get_llm()
     prompt = f"""
 You are the Dungeon Master for a game of Dungeons and Dragons.
@@ -25,18 +28,20 @@ If a Focus is added below than the scene is interuppted and use the focus as the
 Give lots of details but stay true to the expectation or the new focus if given.
 Focus: {focus}
 Expectation: {expectation}
+Context: {context}
 
 """
     response = llm(prompt, max_tokens=600)
     return response["choices"][0]["text"].strip()
 
 
-def narrate_keywords(question, keywords: list, **kwargs):
+def narrate_keywords(question, keywords: list, context=None, **kwargs):
     llm = get_llm()
 
     keyword_str = ", ".join(keywords)
 
-    print(keyword_str)
+    print("Context for LLM: ")
+    print(context)
 
     prompt = f"""
 You are the dungeon master in a fantasy TTRPG.
@@ -45,7 +50,8 @@ The keywords them selves do not need used in your response but they should inspi
 A player asked: \"{question}\"
 And the oracle generated you these keywords: {keyword_str}. Feel free to use only one if they don't mend well or if one creates a strong narrative.
 
-Keep your response just to answering the question but do so with flavor inspired by the keywords.
+Keep your response just to answering the question but do so with flavor inspired by the keywords and any of the following context.
+{context}
 """
     # response = llm(prompt, max_tokens=250, stop=["\n\n"])
     response = llm(prompt, max_tokens=300) 
