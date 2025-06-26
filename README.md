@@ -10,6 +10,8 @@ The application runs as a local web server, providing a responsive user interfac
 >
 > Core features are being actively developed, refined, and sometimes reworked. While the application is functional, the user interface is designed for utility over aesthetics at this stage. The UI/UX is a critical part of the long-term vision but will receive a dedicated focus once the backend functionality is more solidified.
 
+> I am going to be filling in the vault to thoroughly test all of the features currently in place. Development will likely slow while I spend time creating these files for the vault. The short term focus is getting everything functional and proven to be a key part in the larger system. Once I am confident the game is not missing any core features, I will include an example vault that allows for full functionality and then begin refactoring the code base. Once the infrastructure is cleaned up and streamlined the UI/UX will receive an overhaul and stretch goals will begin being considered. 
+
 ## ✨ Key Features
 
 *   **Mythic-Style Oracles**: Core tools for solo play, including Yes/No questions, scene resolution, and meaning generation, all enhanced with narrative flavor from a local LLM.
