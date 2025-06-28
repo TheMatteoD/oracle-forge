@@ -16,6 +16,11 @@ def get_vault_path() -> str:
     return get_database_path('vault')
 
 
+def get_vault_templates_path() -> str:
+    """Get the vault templates root path"""
+    return get_database_path('vault_templates')
+
+
 def get_adventures_path() -> str:
     """Get the adventures directory path"""
     return get_database_path('adventures')
@@ -59,6 +64,11 @@ def get_adventure_file_path(adventure_name: str, filename: str) -> str:
 def get_template_path(template_name: str) -> str:
     """Get the path for a specific template"""
     return os.path.join(get_templates_path(), template_name)
+
+
+def get_vault_template_path(template_path: str) -> str:
+    """Get the path for a specific template in the vault_templates directory"""
+    return os.path.join(get_vault_templates_path(), template_path)
 
 
 def get_table_path(category: str, filename: str) -> str:

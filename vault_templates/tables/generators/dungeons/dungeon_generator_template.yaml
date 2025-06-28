@@ -1,0 +1,19 @@
+# Dungeon Generator Template
+# This file defines tables for generating dungeon elements
+
+- name: "Example Dungeon Generator"  # Generator name
+  source: "Source book and page"  # Source reference
+  dice: "d20"  # Dice type for rolling
+  table:  # Table entries
+    - range: [1, 5]  # Range of results
+      result: "Example Room Type"  # Result text
+      description: "Detailed description of the room type and its features."
+    - range: [6, 10]
+      result: "Example Corridor Type"
+      description: "Detailed description of the corridor type and its features."
+    - range: [11, 15]
+      result: "Example Feature"
+      description: "Detailed description of the feature and its effects."
+    - range: [16, 20]
+      result: "Example Encounter"
+      description: "Detailed description of the encounter and its challenges." 

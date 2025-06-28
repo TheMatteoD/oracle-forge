@@ -1,0 +1,40 @@
+# Monster Template
+# This file defines a monster or creature
+
+title: "Monster Name"  # Display name for the monster
+entries:
+  - name: "Example Monster"  # Monster name
+    system: "OSE:AF"  # Game system (OSE:AF, D&D 5e, etc.)
+    source: "Source book and page"  # Source reference
+    tags:  # Categorization tags
+      - "level 1"
+      - "humanoid"
+      - "worshipper"
+    description: "Brief description of the monster and its behavior."
+    
+    # Combat statistics
+    armor_class: 2  # Armor class value
+    hit_dice: "1 (4hp)"  # Hit dice and average HP
+    attacks: "1 x weapon (damage)"  # Attack description
+    to_hit: 0  # Attack bonus
+    
+    # Movement and positioning
+    movement: "60' (20')"  # Movement rates
+    
+    # Saving throws (system dependent)
+    saving_throws:
+      - brawn: 11
+        agility: 14
+        mind: 15
+    
+    # Other statistics
+    morale: 7  # Morale rating
+    alignment: "Any"  # Alignment
+    experience: 10  # XP value
+    number_appearing: "1d8 (1d20)"  # Number appearing
+    treasure_type: "U"  # Treasure type
+    
+    # Special abilities and traits
+    traits:
+      - "Special ability description"
+      - "Another special ability" 

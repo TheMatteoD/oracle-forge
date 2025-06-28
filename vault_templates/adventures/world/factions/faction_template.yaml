@@ -1,0 +1,51 @@
+# Faction Template
+# This file defines a faction or organization
+
+id: "example-faction"  # Unique identifier
+name: "Example Faction"  # Faction name
+description: "A detailed description of the faction's purpose, history, and current state."
+type: "political"  # political, religious, criminal, military, merchant, etc.
+alignment: "neutral"  # good, evil, neutral, chaotic, lawful
+size: "medium"  # small, medium, large, massive
+influence: 5  # Influence level (1-10)
+
+# Faction details
+goals:
+  - "Primary goal of the faction"
+  - "Secondary goal of the faction"
+
+resources:
+  - "Gold and wealth"
+  - "Political connections"
+  - "Military force"
+
+territory:
+  - "City districts they control"
+  - "Regions they influence"
+
+# Relationships with other factions
+relationships:
+  allies:
+    - "friendly-faction"
+  enemies:
+    - "rival-faction"
+  neutral:
+    - "indifferent-faction"
+
+# Leadership and structure
+leadership:
+  leader: "leader-npc-id"
+  hierarchy: "Hierarchical structure description"
+  decision_making: "How decisions are made"
+
+# Current status and activities
+status: "active"  # active, dormant, destroyed, growing
+current_activities:
+  - "Current major activity"
+  - "Recent developments"
+
+# Custom fields for specific game systems
+custom_fields:
+  headquarters: "Main base location"
+  symbol: "Faction symbol or emblem"
+  colors: "Faction colors" 

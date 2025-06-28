@@ -1,0 +1,47 @@
+# NPC Template
+# This file defines a non-player character
+
+id: "example-npc"  # Unique identifier
+name: "Example NPC"  # Character name
+description: "A richly described character who plays a meaningful role in the story."
+role: "Ally"  # Ally, Enemy, Neutral, Informant, Questgiver, etc.
+faction: "example-faction"  # Associated faction ID
+location: "example-location"  # Current location ID
+status: "active"  # active, missing, dead, unknown
+
+# Character traits and characteristics
+traits:
+  - "wise"
+  - "wounded"
+  - "unpredictable"
+
+motivations:
+  - "Protect their homeland"
+  - "Discover the truth about the past"
+
+secrets:
+  - "Is a spy for another faction"
+  - "Has a magical artifact hidden"
+
+# Personality and behavior
+dialogue_style: "Formal and cryptic"
+mood: "Paranoid but helpful"
+
+# Relationships
+known_relationships:
+  friends:
+    - "another-npc"
+  enemies:
+    - "rival-npc"
+
+# Physical description
+appearance:
+  age: 52
+  features: "White hair, blind in one eye"
+  clothing: "Wears a tattered red cloak with silver trim"
+
+# Custom fields for specific game systems or needs
+custom_fields:
+  prophecy: "When the crimson moon rises, she will return."
+  voice: "Whispers as if afraid of being heard"
+  theme_music: "suspense_theme.mp3" 

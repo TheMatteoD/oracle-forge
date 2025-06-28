@@ -1,0 +1,48 @@
+# Location Template
+# This file defines a location or place
+
+id: "example-location"  # Unique identifier
+name: "The Withered Keep"  # Location name
+description: "A ruined fortress on a storm-battered cliff, haunted by wind and memory."
+region: "Gray Coast"  # Geographic region
+tags:
+  - "haunted"
+  - "strategic"
+
+# Geographic connections
+connections:
+  north: "forgotten-road"
+  east: "shattered-bridge"
+  down: "catacombs"
+
+# Current inhabitants
+npcs_present:
+  - "sister-eilwen"
+factions_present:
+  - "dread-cult"
+
+# Location features
+amenities:
+  - "ruined chapel"
+  - "ancient armory"
+  - "crumbling library"
+
+threats:
+  - "spectral guardian"
+  - "unstable floor"
+
+# Historical information
+history:
+  - "Built during the last age of kings"
+  - "Fell to darkness in the Eclipse War"
+
+# Environmental details
+weather:
+  type: "stormy"
+  notes: "Lightning cracks frequently. The smell of rain never leaves."
+
+# Custom fields for specific game systems
+custom_fields:
+  ambient_music: "withered_keep_theme.mp3"
+  travel_cost: 2  # hours or miles
+  encounter_chance: 25 

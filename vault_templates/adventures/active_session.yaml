@@ -1,0 +1,14 @@
+# Active Session Template
+# This file tracks the current active session
+
+adventure: "adventure_name"  # Name of the adventure
+log: []  # Session log entries
+phase: "start"  # Current phase: start, middle, end
+session_id: "session_01"  # Session identifier
+
+# Optional session metadata
+metadata:
+  start_time: "2024-01-01T10:00:00Z"
+  duration: "2h 30m"
+  scene_count: 0
+  oracle_questions: 0 

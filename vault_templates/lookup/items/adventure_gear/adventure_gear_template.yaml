@@ -1,0 +1,18 @@
+# Adventure Gear Template
+# This file defines adventure gear and tools
+
+title: "Adventure Gear"  # Display name for the category
+entries:
+  - name: "Example Adventure Gear"  # Item name
+    category: "adventure_gear"  # Main category
+    subcategory: "Tool/Kit/Equipment"  # Subcategory
+    tags:  # Categorization tags
+      - "tool"
+      - "kit"
+    description: "Detailed description of the adventure gear."
+    weight: "2 lb"  # Item weight
+    cost: "15 gp"  # Item value
+    properties: "Special properties or characteristics"  # Special properties
+    traits:  # Special traits or abilities
+      - "Special trait 1"
+      - "Special trait 2" 

@@ -1,0 +1,18 @@
+# Equipment Template
+# This file defines equipment and items
+
+title: "Equipment Category"  # Display name for the category
+entries:
+  - name: "Example Item"  # Item name
+    category: "equipment"  # Main category
+    subcategory: "Weapon/Armor/Adventure Gear"  # Subcategory
+    tags:  # Categorization tags
+      - "weapon"
+      - "melee"
+    description: "Detailed description of the item and its use."
+    weight: "1 lb"  # Item weight
+    cost: "10 gp"  # Item cost
+    properties: "Item properties and special rules"  # Special properties
+    traits:  # Special traits or abilities
+      - "Special trait 1"
+      - "Special trait 2" 

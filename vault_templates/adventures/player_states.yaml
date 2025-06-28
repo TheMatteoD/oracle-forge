@@ -1,0 +1,14 @@
+# Player States Template
+# This file tracks all player characters in the adventure
+
+players:
+  # List of player character filenames (without .yaml extension)
+  # Example: - "character_name.yaml"
+  - "example_character.yaml"
+  - "another_character.yaml"
+
+# Optional metadata
+metadata:
+  total_players: 0  # Number of active players
+  party_level: 1  # Average party level
+  party_size: 0  # Number of characters in party 

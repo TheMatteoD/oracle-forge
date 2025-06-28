@@ -1,0 +1,18 @@
+# Trade Goods Template
+# This file defines trade goods and commodities
+
+title: "Trade Goods"  # Display name for the category
+entries:
+  - name: "Example Trade Good"  # Item name
+    category: "trade_goods"  # Main category
+    subcategory: "Raw Material/Processed Good"  # Subcategory
+    tags:  # Categorization tags
+      - "raw_material"
+      - "processed"
+    description: "Detailed description of the trade good."
+    weight: "10 lb"  # Item weight
+    cost: "5 gp"  # Item value
+    properties: "Special properties or characteristics"  # Special properties
+    traits:  # Special traits or abilities
+      - "Special trait 1"
+      - "Special trait 2" 

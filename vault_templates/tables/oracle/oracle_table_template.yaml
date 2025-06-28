@@ -1,0 +1,16 @@
+# Oracle Table Template
+# This file defines an oracle table for random generation
+
+- name: "Example Oracle Table"  # Table name
+  source: "Source book and page"  # Source reference
+  dice: "d100"  # Dice type for rolling
+  table:  # Table entries
+    - range: [1, 5]  # Range of results
+      result: "Example Result 1"  # Result text
+      description: "Detailed description of what this result means and how to interpret it."
+    - range: [6, 10]
+      result: "Example Result 2"
+      description: "Detailed description of what this result means and how to interpret it."
+    - range: [11, 20]
+      result: "Example Result 3"
+      description: "Detailed description of what this result means and how to interpret it." 

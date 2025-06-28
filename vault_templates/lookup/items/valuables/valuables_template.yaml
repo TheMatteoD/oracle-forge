@@ -1,0 +1,18 @@
+# Valuables Template
+# This file defines valuable items and treasures
+
+title: "Valuables"  # Display name for the category
+entries:
+  - name: "Example Valuable"  # Item name
+    category: "valuables"  # Main category
+    subcategory: "Gem/Jewelry/Art"  # Subcategory
+    tags:  # Categorization tags
+      - "gem"
+      - "jewelry"
+    description: "Detailed description of the valuable item."
+    weight: "0.1 lb"  # Item weight
+    cost: "100 gp"  # Item value
+    properties: "Special properties or characteristics"  # Special properties
+    traits:  # Special traits or abilities
+      - "Special trait 1"
+      - "Special trait 2" 

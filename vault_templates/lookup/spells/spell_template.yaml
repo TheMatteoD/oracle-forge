@@ -1,0 +1,24 @@
+# Spell Template
+# This file defines spells and magical effects
+
+title: "Spells"  # Display name for the category
+entries:
+  - name: "Example Spell"  # Spell name
+    system: "OSE:AF"  # Game system
+    source: "Source book and page"  # Source reference
+    level: 1  # Spell level
+    school: "Evocation"  # Magic school
+    casting_time: "1 action"  # Casting time
+    range: "60 feet"  # Spell range
+    components:  # Spell components
+      - "V"  # Verbal
+      - "S"  # Somatic
+      - "M"  # Material
+    duration: "Instantaneous"  # Spell duration
+    description: "Detailed description of the spell's effects."
+    tags:  # Categorization tags
+      - "damage"
+      - "combat"
+    traits:  # Special traits or abilities
+      - "Special trait 1"
+      - "Special trait 2" 

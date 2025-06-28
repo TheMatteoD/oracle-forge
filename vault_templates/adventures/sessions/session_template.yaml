@@ -1,0 +1,69 @@
+# Session Template
+# This file defines a game session
+
+session_id: "session_01"  # Unique session identifier
+adventure: "adventure_name"  # Associated adventure name
+date: "2024-01-01"  # Session date
+duration: "2h 30m"  # Session duration
+phase: "start"  # Session phase: start, middle, end
+
+# Session log entries
+log:
+  - timestamp: "10:00"
+    entry: "Session begins. Characters gather at the tavern."
+    type: "narrative"
+  - timestamp: "10:15"
+    entry: "Oracle question: Is the innkeeper friendly? Result: Yes, but..."
+    type: "oracle"
+  - timestamp: "10:30"
+    entry: "Combat encounter with bandits. Party wins."
+    type: "combat"
+
+# Characters present
+characters_present:
+  - "player-character-1"
+  - "player-character-2"
+
+# NPCs encountered
+npcs_encountered:
+  - "innkeeper-npc"
+  - "bandit-leader-npc"
+
+# Locations visited
+locations_visited:
+  - "tavern-location"
+  - "road-location"
+
+# Key events and discoveries
+key_events:
+  - "Learned about the missing crown"
+  - "Discovered bandit hideout location"
+  - "Gained favor with local merchant"
+
+# Items found or lost
+items:
+  found:
+    - "Bandit's map"
+    - "Gold coins (25 gp)"
+  lost:
+    - "Healing potion (used)"
+
+# Experience and rewards
+rewards:
+  experience: 150
+  gold: 25
+  items:
+    - "Bandit's map"
+    - "Silver ring"
+
+# Notes and observations
+notes:
+  - "Players seemed engaged with the mystery"
+  - "Combat was challenging but fair"
+  - "Need to prepare more NPC dialogue"
+
+# Custom fields for specific game systems
+custom_fields:
+  chaos_factor_change: 0
+  threads_advanced: 1
+  threads_closed: 0 

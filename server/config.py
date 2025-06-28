@@ -20,6 +20,7 @@ logger = logging.getLogger(__name__)
 class DatabaseConfig:
     """Database configuration settings"""
     vault_path: str = "vault"
+    vault_templates_path: str = "vault_templates"
     adventures_path: str = "vault/adventures"
     templates_path: str = "vault/templates"
     tables_path: str = "vault/tables"
@@ -99,6 +100,7 @@ class ConfigManager:
         if 'database' in yaml_data:
             db_data = yaml_data['database']
             base_config.database.vault_path = db_data.get('vault_path', base_config.database.vault_path)
+            base_config.database.vault_templates_path = db_data.get('vault_templates_path', base_config.database.vault_templates_path)
             base_config.database.adventures_path = db_data.get('adventures_path', base_config.database.adventures_path)
             base_config.database.templates_path = db_data.get('templates_path', base_config.database.templates_path)
             base_config.database.tables_path = db_data.get('tables_path', base_config.database.tables_path)
@@ -138,6 +140,7 @@ class ConfigManager:
         
         # Database paths
         config.database.vault_path = os.getenv('ORACLE_FORGE_VAULT_PATH', config.database.vault_path)
+        config.database.vault_templates_path = os.getenv('ORACLE_FORGE_VAULT_TEMPLATES_PATH', config.database.vault_templates_path)
         config.database.adventures_path = os.getenv('ORACLE_FORGE_ADVENTURES_PATH', config.database.adventures_path)
         config.database.templates_path = os.getenv('ORACLE_FORGE_TEMPLATES_PATH', config.database.templates_path)
         config.database.tables_path = os.getenv('ORACLE_FORGE_TABLES_PATH', config.database.tables_path)
@@ -176,6 +179,7 @@ class ConfigManager:
         # Validate required paths exist
         required_paths = [
             ('vault_path', config.database.vault_path),
+            ('vault_templates_path', config.database.vault_templates_path),
             ('adventures_path', config.database.adventures_path),
             ('templates_path', config.database.templates_path),
             ('tables_path', config.database.tables_path),
@@ -215,6 +219,7 @@ class ConfigManager:
         """Get a database path by type"""
         path_map = {
             'vault': self.config.database.vault_path,
+            'vault_templates': self.config.database.vault_templates_path,
             'adventures': self.config.database.adventures_path,
             'templates': self.config.database.templates_path,
             'tables': self.config.database.tables_path,
@@ -235,6 +240,7 @@ class ConfigManager:
             'environment': self.config.environment,
             'database': {
                 'vault_path': self.config.database.vault_path,
+                'vault_templates_path': self.config.database.vault_templates_path,
                 'adventures_path': self.config.database.adventures_path,
                 'templates_path': self.config.database.templates_path,
                 'tables_path': self.config.database.tables_path,

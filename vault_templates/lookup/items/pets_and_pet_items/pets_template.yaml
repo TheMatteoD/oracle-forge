@@ -1,0 +1,18 @@
+# Pets and Pet Items Template
+# This file defines pets and pet-related items
+
+title: "Pets and Pet Items"  # Display name for the category
+entries:
+  - name: "Example Pet/Item"  # Item name
+    category: "pets_and_pet_items"  # Main category
+    subcategory: "Pet/Pet Item"  # Subcategory
+    tags:  # Categorization tags
+      - "pet"
+      - "companion"
+    description: "Detailed description of the pet or pet item."
+    weight: "5 lb"  # Item weight
+    cost: "25 gp"  # Item value
+    properties: "Special properties or characteristics"  # Special properties
+    traits:  # Special traits or abilities
+      - "Special trait 1"
+      - "Special trait 2" 

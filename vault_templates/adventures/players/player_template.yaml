@@ -1,0 +1,66 @@
+# Player Character Template
+# This file defines a player character
+
+id: "example-player"  # Unique identifier
+name: "Example Player"  # Character name
+player: "Player Name"  # Name of the actual player
+description: "A detailed description of the character's appearance, personality, and background."
+class: "Fighter"  # Character class
+level: 1  # Character level
+race: "Human"  # Character race
+background: "Soldier"  # Character background
+
+# Core statistics (system dependent)
+stats:
+  strength: 15
+  dexterity: 14
+  constitution: 13
+  intelligence: 12
+  wisdom: 10
+  charisma: 8
+
+# Combat information
+combat:
+  armor_class: 16
+  hit_points: 12
+  hit_dice: "1d10"
+  initiative: 2
+
+# Equipment and inventory
+equipment:
+  - "Longsword"
+  - "Chain mail"
+  - "Shield"
+  - "Backpack"
+
+# Skills and abilities
+skills:
+  - "Athletics"
+  - "Intimidation"
+  - "Perception"
+
+# Character traits and personality
+personality:
+  traits:
+    - "Brave and honorable"
+    - "Loyal to friends"
+  ideals:
+    - "Protect the innocent"
+  bonds:
+    - "Sworn to protect the kingdom"
+  flaws:
+    - "Sometimes too trusting"
+
+# Background and story
+background:
+  origin: "Small village in the north"
+  motivation: "Seek adventure and glory"
+  connections:
+    - "Mentor: Old warrior in the village"
+    - "Rival: Another young fighter"
+
+# Custom fields for specific game systems
+custom_fields:
+  experience_points: 0
+  inspiration: false
+  proficiency_bonus: 2 

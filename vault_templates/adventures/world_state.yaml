@@ -1,0 +1,17 @@
+# World State Template
+# This file tracks the overall state of the adventure world
+
+chaos_factor: 5  # Mythic oracle chaos factor (1-9)
+current_scene: 1  # Current scene number
+days_passed: 0  # Number of in-game days passed
+factions: []  # List of active faction IDs
+locations: []  # List of discovered location IDs
+preferred_rule_system: "Oracle Forge"  # Primary rule system being used
+story_lines: []  # List of active story line IDs
+
+# Optional custom fields
+custom_fields:
+  weather: "clear"
+  season: "spring"
+  moon_phase: "new"
+  current_year: 1 

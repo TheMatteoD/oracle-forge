@@ -7,6 +7,7 @@ the Oracle Forge application.
 
 from .paths import (
     get_vault_path,
+    get_vault_templates_path,
     get_adventures_path,
     get_templates_path,
     get_tables_path,
@@ -16,6 +17,7 @@ from .paths import (
     get_adventure_path,
     get_adventure_file_path,
     get_template_path,
+    get_vault_template_path,
     get_table_path,
     get_lookup_file_path,
     ensure_directory_exists,
@@ -30,6 +32,7 @@ from .paths import (
 
 __all__ = [
     'get_vault_path',
+    'get_vault_templates_path',
     'get_adventures_path',
     'get_templates_path',
     'get_tables_path',
@@ -39,6 +42,7 @@ __all__ = [
     'get_adventure_path',
     'get_adventure_file_path',
     'get_template_path',
+    'get_vault_template_path',
     'get_table_path',
     'get_lookup_file_path',
     'ensure_directory_exists',

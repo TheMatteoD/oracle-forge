@@ -1,0 +1,69 @@
+# Story Line Template
+# This file defines a story line or plot thread
+
+id: "example-story-line"  # Unique identifier
+name: "The Lost Crown"  # Story line name
+description: "A mysterious crown has been stolen from the royal vault, and the kingdom is in turmoil."
+type: "quest"  # quest, mystery, war, romance, etc.
+status: "active"  # active, resolved, failed, abandoned
+priority: "high"  # low, medium, high, critical
+
+# Story line details
+objectives:
+  - "Find the stolen crown"
+  - "Identify the thief"
+  - "Return the crown to the king"
+
+key_events:
+  - "Crown was stolen during the festival"
+  - "Suspicious activity in the merchant district"
+  - "Rumors of a secret buyer"
+
+# Characters involved
+characters:
+  protagonists:
+    - "player-character-1"
+    - "player-character-2"
+  antagonists:
+    - "thief-npc"
+  supporting:
+    - "king-npc"
+    - "guard-captain-npc"
+
+# Locations involved
+locations:
+  - "royal-palace"
+  - "merchant-district"
+  - "underground-market"
+
+# Timeline and progression
+timeline:
+  start_date: "Day 1"
+  current_progress: "Investigating leads"
+  estimated_completion: "Day 10"
+
+# Clues and information
+clues:
+  - "Footprints leading to the merchant district"
+  - "Witness saw a hooded figure"
+  - "Unusual coin found at the scene"
+
+# Rewards and consequences
+rewards:
+  - "Royal favor"
+  - "Gold reward"
+  - "Political influence"
+
+consequences:
+  success:
+    - "Kingdom stability restored"
+    - "Thief brought to justice"
+  failure:
+    - "Kingdom descends into chaos"
+    - "Thief escapes with crown"
+
+# Custom fields for specific game systems
+custom_fields:
+  difficulty: "medium"
+  xp_reward: 500
+  reputation_impact: "positive" 
