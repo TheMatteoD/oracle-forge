@@ -8,6 +8,7 @@ from .routes.generators import generators
 from .routes.combat import combat_bp
 from .routes.session import session
 from .config import get_config, config_manager
+from .middleware.error_handlers import register_error_handlers
 
 # Configure logging
 logging.basicConfig(
@@ -28,6 +29,9 @@ if config.server.secret_key:
     app.secret_key = config.server.secret_key
 else:
     app.secret_key = 'dev-secret-key-change-in-production'
+
+# Register error handlers
+register_error_handlers(app)
 
 # Register blueprints
 app.register_blueprint(oracle)
@@ -60,4 +64,14 @@ def config_status():
             "port": config.server.port,
             "debug": config.server.debug,
         }
+    }
+
+# Add API health check endpoint
+@app.route("/health", methods=["GET"])
+def health_check():
+    """Health check endpoint for API monitoring"""
+    return {
+        "status": "healthy",
+        "service": "Oracle Forge API",
+        "version": "1.0.0"
     }
