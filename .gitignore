@@ -98,7 +98,7 @@ vault/
 llama.cpp/
 
 # Personal notes
-.notes.txt
+.notes/
 
 # Temp files
 *.tmp
@@ -107,5 +107,32 @@ llama.cpp/
 server/azgaar/
 
 scripts/pdf_to_markdown_scripts/
-config/
 oracle-forge-ui/src/config.js
+
+# Configuration and environment files
+config/
+
+# Environment-specific configuration
+.env.local
+.env.production
+.env.staging
+.env.development
+
+# Secret keys and sensitive data
+*.key
+*.pem
+*.p12
+*.pfx
+secrets/
+secrets.yaml
+secrets.yml
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+
+# Backup files
+*.bak
+*.backup
+*~
