@@ -15,20 +15,24 @@ function FactionsSection({ adventure }) {
     setLoading(true);
     fetch(`${API_BASE}/adventures/${adventure}/world/factions`)
       .then(res => res.json())
-      .then(data => {
-        setFactions(data || []);
+      .then(response => {
+        if (response.success) {
+          setFactions(response.data || []);
+        } else {
+          console.error("Failed to fetch factions:", response.error);
+          setFactions([]);
+        }
         setLoading(false);
       })
-      .catch(() => {
+      .catch(error => {
+        console.error("Error fetching factions:", error);
         setError('Failed to load factions.');
+        setFactions([]);
         setLoading(false);
       });
   };
 
-  useEffect(() => {
-    if (adventure) fetchFactions();
-    // eslint-disable-next-line
-  }, [adventure]);
+  useEffect(() => { if (adventure) fetchFactions(); }, [adventure]);
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -37,17 +41,23 @@ function FactionsSection({ adventure }) {
   const handleAdd = () => {
     setLoading(true);
     fetch(`${API_BASE}/adventures/${adventure}/world/factions/${encodeURIComponent(form.name)}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(form)
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(form)
     })
       .then(res => res.json())
-      .then(() => {
-        setShowAdd(false);
-        setForm({ name: '', description: '', status: '' });
-        fetchFactions();
+      .then(response => {
+        if (response.success) {
+          setShowAdd(false);
+          setForm({ name: '', description: '', status: '' });
+          fetchFactions();
+        } else {
+          console.error("Failed to add faction:", response.error);
+          setError('Failed to add faction.');
+        }
       })
-      .catch(() => setError('Failed to add faction.'));
+      .catch(error => {
+        console.error("Error adding faction:", error);
+        setError('Failed to add faction.');
+      });
   };
 
   const handleEdit = (faction) => {
@@ -58,28 +68,42 @@ function FactionsSection({ adventure }) {
   const handleUpdate = () => {
     setLoading(true);
     fetch(`${API_BASE}/adventures/${adventure}/world/factions/${encodeURIComponent(editFaction)}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(form)
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(form)
     })
       .then(res => res.json())
-      .then(() => {
-        setEditFaction(null);
-        setForm({ name: '', description: '', status: '' });
-        fetchFactions();
+      .then(response => {
+        if (response.success) {
+          setEditFaction(null);
+          setForm({ name: '', description: '', status: '' });
+          fetchFactions();
+        } else {
+          console.error("Failed to update faction:", response.error);
+          setError('Failed to update faction.');
+        }
       })
-      .catch(() => setError('Failed to update faction.'));
+      .catch(error => {
+        console.error("Error updating faction:", error);
+        setError('Failed to update faction.');
+      });
   };
 
   const handleDelete = (name) => {
     if (!window.confirm(`Delete faction '${name}'?`)) return;
     setLoading(true);
-    fetch(`${API_BASE}/adventures/${adventure}/world/factions/${encodeURIComponent(name)}`, {
-      method: 'DELETE'
-    })
+    fetch(`${API_BASE}/adventures/${adventure}/world/factions/${encodeURIComponent(name)}`, { method: 'DELETE' })
       .then(res => res.json())
-      .then(() => fetchFactions())
-      .catch(() => setError('Failed to delete faction.'));
+      .then(response => {
+        if (response.success) {
+          fetchFactions();
+        } else {
+          console.error("Failed to delete faction:", response.error);
+          setError('Failed to delete faction.');
+        }
+      })
+      .catch(error => {
+        console.error("Error deleting faction:", error);
+        setError('Failed to delete faction.');
+      });
   };
 
   return (
@@ -132,34 +156,91 @@ function LocationsSection({ adventure }) {
     setLoading(true);
     fetch(`${API_BASE}/adventures/${adventure}/world/locations`)
       .then(res => res.json())
-      .then(data => { setLocations(data || []); setLoading(false); })
-      .catch(() => { setError('Failed to load locations.'); setLoading(false); });
+      .then(response => {
+        if (response.success) {
+          setLocations(response.data || []);
+        } else {
+          console.error("Failed to fetch locations:", response.error);
+          setLocations([]);
+        }
+        setLoading(false);
+      })
+      .catch(error => {
+        console.error("Error fetching locations:", error);
+        setError('Failed to load locations.');
+        setLocations([]);
+        setLoading(false);
+      });
   };
+
   useEffect(() => { if (adventure) fetchLocations(); }, [adventure]);
   const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
+  
   const handleAdd = () => {
     setLoading(true);
     fetch(`${API_BASE}/adventures/${adventure}/world/locations/${encodeURIComponent(form.name)}`, {
       method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(form)
     })
-      .then(res => res.json()).then(() => { setShowAdd(false); setForm({ name: '', description: '', status: '' }); fetchLocations(); })
-      .catch(() => setError('Failed to add location.'));
+      .then(res => res.json())
+      .then(response => {
+        if (response.success) {
+          setShowAdd(false);
+          setForm({ name: '', description: '', status: '' });
+          fetchLocations();
+        } else {
+          console.error("Failed to add location:", response.error);
+          setError('Failed to add location.');
+        }
+      })
+      .catch(error => {
+        console.error("Error adding location:", error);
+        setError('Failed to add location.');
+      });
   };
+
   const handleEdit = (loc) => { setEditLocation(loc.name); setForm(loc); };
+  
   const handleUpdate = () => {
     setLoading(true);
     fetch(`${API_BASE}/adventures/${adventure}/world/locations/${encodeURIComponent(editLocation)}`, {
       method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(form)
     })
-      .then(res => res.json()).then(() => { setEditLocation(null); setForm({ name: '', description: '', status: '' }); fetchLocations(); })
-      .catch(() => setError('Failed to update location.'));
+      .then(res => res.json())
+      .then(response => {
+        if (response.success) {
+          setEditLocation(null);
+          setForm({ name: '', description: '', status: '' });
+          fetchLocations();
+        } else {
+          console.error("Failed to update location:", response.error);
+          setError('Failed to update location.');
+        }
+      })
+      .catch(error => {
+        console.error("Error updating location:", error);
+        setError('Failed to update location.');
+      });
   };
+
   const handleDelete = (name) => {
     if (!window.confirm(`Delete location '${name}'?`)) return;
     setLoading(true);
     fetch(`${API_BASE}/adventures/${adventure}/world/locations/${encodeURIComponent(name)}`, { method: 'DELETE' })
-      .then(res => res.json()).then(() => fetchLocations()).catch(() => setError('Failed to delete location.'));
+      .then(res => res.json())
+      .then(response => {
+        if (response.success) {
+          fetchLocations();
+        } else {
+          console.error("Failed to delete location:", response.error);
+          setError('Failed to delete location.');
+        }
+      })
+      .catch(error => {
+        console.error("Error deleting location:", error);
+        setError('Failed to delete location.');
+      });
   };
+
   return (
     <div className="mt-4">
       <h4 className="font-semibold">Locations</h4>
@@ -210,34 +291,91 @@ function StoryLinesSection({ adventure }) {
     setLoading(true);
     fetch(`${API_BASE}/adventures/${adventure}/world/story_lines`)
       .then(res => res.json())
-      .then(data => { setStoryLines(data || []); setLoading(false); })
-      .catch(() => { setError('Failed to load story lines.'); setLoading(false); });
+      .then(response => {
+        if (response.success) {
+          setStoryLines(response.data || []);
+        } else {
+          console.error("Failed to fetch story lines:", response.error);
+          setStoryLines([]);
+        }
+        setLoading(false);
+      })
+      .catch(error => {
+        console.error("Error fetching story lines:", error);
+        setError('Failed to load story lines.');
+        setStoryLines([]);
+        setLoading(false);
+      });
   };
+
   useEffect(() => { if (adventure) fetchStoryLines(); }, [adventure]);
   const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
+  
   const handleAdd = () => {
     setLoading(true);
     fetch(`${API_BASE}/adventures/${adventure}/world/story_lines/${encodeURIComponent(form.name)}`, {
       method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(form)
     })
-      .then(res => res.json()).then(() => { setShowAdd(false); setForm({ name: '', description: '', status: '' }); fetchStoryLines(); })
-      .catch(() => setError('Failed to add story line.'));
+      .then(res => res.json())
+      .then(response => {
+        if (response.success) {
+          setShowAdd(false);
+          setForm({ name: '', description: '', status: '' });
+          fetchStoryLines();
+        } else {
+          console.error("Failed to add story line:", response.error);
+          setError('Failed to add story line.');
+        }
+      })
+      .catch(error => {
+        console.error("Error adding story line:", error);
+        setError('Failed to add story line.');
+      });
   };
+
   const handleEdit = (story) => { setEditStory(story.name); setForm(story); };
+  
   const handleUpdate = () => {
     setLoading(true);
     fetch(`${API_BASE}/adventures/${adventure}/world/story_lines/${encodeURIComponent(editStory)}`, {
       method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(form)
     })
-      .then(res => res.json()).then(() => { setEditStory(null); setForm({ name: '', description: '', status: '' }); fetchStoryLines(); })
-      .catch(() => setError('Failed to update story line.'));
+      .then(res => res.json())
+      .then(response => {
+        if (response.success) {
+          setEditStory(null);
+          setForm({ name: '', description: '', status: '' });
+          fetchStoryLines();
+        } else {
+          console.error("Failed to update story line:", response.error);
+          setError('Failed to update story line.');
+        }
+      })
+      .catch(error => {
+        console.error("Error updating story line:", error);
+        setError('Failed to update story line.');
+      });
   };
+
   const handleDelete = (name) => {
     if (!window.confirm(`Delete story line '${name}'?`)) return;
     setLoading(true);
     fetch(`${API_BASE}/adventures/${adventure}/world/story_lines/${encodeURIComponent(name)}`, { method: 'DELETE' })
-      .then(res => res.json()).then(() => fetchStoryLines()).catch(() => setError('Failed to delete story line.'));
+      .then(res => res.json())
+      .then(response => {
+        if (response.success) {
+          fetchStoryLines();
+        } else {
+          console.error("Failed to delete story line:", response.error);
+          setError('Failed to delete story line.');
+        }
+      })
+      .catch(error => {
+        console.error("Error deleting story line:", error);
+        setError('Failed to delete story line.');
+      });
   };
+
   return (
     <div className="mt-4">
       <h4 className="font-semibold">Story Lines</h4>
@@ -288,34 +426,91 @@ function NPCsSection({ adventure }) {
     setLoading(true);
     fetch(`${API_BASE}/adventures/${adventure}/world/npcs`)
       .then(res => res.json())
-      .then(data => { setNpcs(data || []); setLoading(false); })
-      .catch(() => { setError('Failed to load NPCs.'); setLoading(false); });
+      .then(response => {
+        if (response.success) {
+          setNpcs(response.data || []);
+        } else {
+          console.error("Failed to fetch NPCs:", response.error);
+          setNpcs([]);
+        }
+        setLoading(false);
+      })
+      .catch(error => {
+        console.error("Error fetching NPCs:", error);
+        setError('Failed to load NPCs.');
+        setNpcs([]);
+        setLoading(false);
+      });
   };
+
   useEffect(() => { if (adventure) fetchNpcs(); }, [adventure]);
   const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
+  
   const handleAdd = () => {
     setLoading(true);
     fetch(`${API_BASE}/adventures/${adventure}/world/npcs/${encodeURIComponent(form.name)}`, {
       method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(form)
     })
-      .then(res => res.json()).then(() => { setShowAdd(false); setForm({ name: '', description: '', status: '', location: '', faction: '' }); fetchNpcs(); })
-      .catch(() => setError('Failed to add NPC.'));
+      .then(res => res.json())
+      .then(response => {
+        if (response.success) {
+          setShowAdd(false);
+          setForm({ name: '', description: '', status: '', location: '', faction: '' });
+          fetchNpcs();
+        } else {
+          console.error("Failed to add NPC:", response.error);
+          setError('Failed to add NPC.');
+        }
+      })
+      .catch(error => {
+        console.error("Error adding NPC:", error);
+        setError('Failed to add NPC.');
+      });
   };
+
   const handleEdit = (npc) => { setEditNpc(npc.name); setForm(npc); };
+  
   const handleUpdate = () => {
     setLoading(true);
     fetch(`${API_BASE}/adventures/${adventure}/world/npcs/${encodeURIComponent(editNpc)}`, {
       method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(form)
     })
-      .then(res => res.json()).then(() => { setEditNpc(null); setForm({ name: '', description: '', status: '', location: '', faction: '' }); fetchNpcs(); })
-      .catch(() => setError('Failed to update NPC.'));
+      .then(res => res.json())
+      .then(response => {
+        if (response.success) {
+          setEditNpc(null);
+          setForm({ name: '', description: '', status: '', location: '', faction: '' });
+          fetchNpcs();
+        } else {
+          console.error("Failed to update NPC:", response.error);
+          setError('Failed to update NPC.');
+        }
+      })
+      .catch(error => {
+        console.error("Error updating NPC:", error);
+        setError('Failed to update NPC.');
+      });
   };
+
   const handleDelete = (name) => {
     if (!window.confirm(`Delete NPC '${name}'?`)) return;
     setLoading(true);
     fetch(`${API_BASE}/adventures/${adventure}/world/npcs/${encodeURIComponent(name)}`, { method: 'DELETE' })
-      .then(res => res.json()).then(() => fetchNpcs()).catch(() => setError('Failed to delete NPC.'));
+      .then(res => res.json())
+      .then(response => {
+        if (response.success) {
+          fetchNpcs();
+        } else {
+          console.error("Failed to delete NPC:", response.error);
+          setError('Failed to delete NPC.');
+        }
+      })
+      .catch(error => {
+        console.error("Error deleting NPC:", error);
+        setError('Failed to delete NPC.');
+      });
   };
+
   return (
     <div className="mt-4">
       <h4 className="font-semibold">NPCs</h4>

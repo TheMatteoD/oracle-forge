@@ -38,19 +38,31 @@ export default function YesNoOracle({ chaos }) {
     setFlavorData(null);
     setOutput('');
     setFlavorText('');
-    const res = await fetch(`${API}/oracle/yesno`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ question, odds, chaos })
-    });
-    const data = await res.json();
-    setOutput(`Q: ${data.question}\nRoll: ${data.roll}\nResult: ${data.result}\n${data.event_trigger || ''}`);
-    setFlavorData({
-      question,
-      result: data.result,
-      event_trigger: data.event_trigger
-    });
-    setLoading(false);
+    try {
+      const res = await fetch(`${API}/oracle/yesno`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ question, odds, chaos })
+      });
+      const response = await res.json();
+      if (response.success) {
+        const data = response.data;
+        setOutput(`Q: ${data.question}\nRoll: ${data.roll}\nResult: ${data.result}\n${data.event_trigger || ''}`);
+        setFlavorData({
+          question,
+          result: data.result,
+          event_trigger: data.event_trigger
+        });
+      } else {
+        console.error("Failed to get oracle result:", response.error);
+        setOutput("Error: Failed to get oracle result");
+      }
+    } catch (error) {
+      console.error("Error getting oracle result:", error);
+      setOutput("Error: Failed to get oracle result");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleFlavor = async () => {
@@ -62,10 +74,15 @@ export default function YesNoOracle({ chaos }) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(flavorData)
       });
-      const data = await res.json();
-      setOutput((prev) => `${prev}\n\n${data.narration}`);
-      setFlavorText(data.narration);
-      setFlavorData(null);
+      const response = await res.json();
+      if (response.success) {
+        const data = response.data;
+        setOutput((prev) => `${prev}\n\n${data.narration}`);
+        setFlavorText(data.narration);
+        setFlavorData(null);
+      } else {
+        console.error("Failed to get flavor:", response.error);
+      }
     } catch (error) {
       console.error("Failed to fetch flavor:", error);
     } finally {
@@ -87,13 +104,15 @@ export default function YesNoOracle({ chaos }) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ content: text, type: 'oracle' })
       });
-      const data = await res.json();
-      if (data.success) {
+      const response = await res.json();
+      if (response.success) {
         setShowLogModal(false);
       } else {
+        console.error("Failed to save log:", response.error);
         setLogError('Failed to save log.');
       }
-    } catch {
+    } catch (error) {
+      console.error("Error saving log:", error);
       setLogError('Failed to save log.');
     } finally {
       setLogSaving(false);

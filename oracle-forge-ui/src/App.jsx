@@ -17,14 +17,19 @@ function App() {
   useEffect(() => {
     fetch(`${API_BASE}/adventures/active`)
       .then(res => res.json())
-      .then(data => {
-        if (data.active) {
-          localStorage.setItem("activeAdventure", data.active);
-          setActiveAdventure(data.active);
+      .then(response => {
+        if (response.success && response.data?.active) {
+          localStorage.setItem("activeAdventure", response.data.active);
+          setActiveAdventure(response.data.active);
         } else {
           localStorage.removeItem("activeAdventure");
           setActiveAdventure(null);
         }
+        setLoading(false);
+      })
+      .catch(error => {
+        console.error("Error fetching active adventure:", error);
+        setActiveAdventure(null);
         setLoading(false);
       });
   }, []);

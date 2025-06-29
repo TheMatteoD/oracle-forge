@@ -26,13 +26,23 @@ export default function LookupPage() {
       Object.entries(body).map(([key, value]) => [key, value === '' ? undefined : value])
     );
     
-    const res = await fetch(`${API}${path}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(cleanBody)
-    });
-    const data = await res.json();
-    setter(JSON.stringify(data, null, 2));
+    try {
+      const res = await fetch(`${API}${path}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(cleanBody)
+      });
+      const response = await res.json();
+      if (response.success) {
+        setter(JSON.stringify(response.data, null, 2));
+      } else {
+        console.error("Failed to fetch data:", response.error);
+        setter(JSON.stringify({ error: response.error }, null, 2));
+      }
+    } catch (error) {
+      console.error("Error fetching data:", error);
+      setter(JSON.stringify({ error: "Failed to fetch data" }, null, 2));
+    }
   };
 
   const handleRewrite = async () => {
@@ -41,17 +51,27 @@ export default function LookupPage() {
       return;
     }
 
-    const res = await fetch(`${API}/lookup/rewrite`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        narration: rewriteNarration,
-        instruction: rewriteInstruction,
-        log_session: true
-      })
-    });
-    const data = await res.json();
-    setRewriteOutput(JSON.stringify(data, null, 2));
+    try {
+      const res = await fetch(`${API}/lookup/rewrite`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          narration: rewriteNarration,
+          instruction: rewriteInstruction,
+          log_session: true
+        })
+      });
+      const response = await res.json();
+      if (response.success) {
+        setRewriteOutput(JSON.stringify(response.data, null, 2));
+      } else {
+        console.error("Failed to rewrite narration:", response.error);
+        setRewriteOutput(JSON.stringify({ error: response.error }, null, 2));
+      }
+    } catch (error) {
+      console.error("Error rewriting narration:", error);
+      setRewriteOutput(JSON.stringify({ error: "Failed to rewrite narration" }, null, 2));
+    }
   };
 
   const renderLookupSection = (title, query, setQuery, fetchFunction, output, setOutput) => {

@@ -34,16 +34,24 @@ export default function MapViewer({ adventure }) {
     setCustomLoading(true);
     fetch(`${config.SERVER_URL}/adventures/${adventure}/custom_maps`)
       .then(res => res.json())
-      .then(files => {
-        setCustomMaps(files);
-        setCustomIndex(0);
+      .then(response => {
+        if (response.success) {
+          setCustomMaps(response.data || []);
+          setCustomIndex(0);
+        } else {
+          console.error("Failed to fetch custom maps:", response.error);
+          setCustomMaps([]);
+        }
       })
-      .catch(() => setCustomMaps([]))
+      .catch(error => {
+        console.error("Error fetching custom maps:", error);
+        setCustomMaps([]);
+      })
       .finally(() => setCustomLoading(false));
   };
+
   useEffect(() => {
     fetchCustomMaps();
-
   }, [adventure, customStatus]);
 
   // Azgaar map upload
@@ -52,14 +60,20 @@ export default function MapViewer({ adventure }) {
     const formData = new FormData();
     formData.append("file", azgaarUploadFile);
     setAzgaarStatus(null);
-    const res = await fetch(`${config.SERVER_URL}/adventures/${adventure}/upload_map`, {
-      method: "POST",
-      body: formData,
-    });
-    const data = await res.json();
-    if (data.success) {
-      setAzgaarStatus("✅ Map uploaded!");
-    } else {
+    try {
+      const res = await fetch(`${config.SERVER_URL}/adventures/${adventure}/upload_map`, {
+        method: "POST",
+        body: formData,
+      });
+      const response = await res.json();
+      if (response.success) {
+        setAzgaarStatus("✅ Map uploaded!");
+      } else {
+        console.error("Failed to upload Azgaar map:", response.error);
+        setAzgaarStatus("❌ Upload failed.");
+      }
+    } catch (error) {
+      console.error("Error uploading Azgaar map:", error);
       setAzgaarStatus("❌ Upload failed.");
     }
   };
@@ -70,15 +84,21 @@ export default function MapViewer({ adventure }) {
     const formData = new FormData();
     formData.append("file", customUploadFile);
     setCustomStatus(null);
-    const res = await fetch(`${config.SERVER_URL}/adventures/${adventure}/upload_custom_map`, {
-      method: "POST",
-      body: formData,
-    });
-    const data = await res.json();
-    if (data.success) {
-      setCustomStatus("✅ Image uploaded!");
-      fetchCustomMaps();
-    } else {
+    try {
+      const res = await fetch(`${config.SERVER_URL}/adventures/${adventure}/upload_custom_map`, {
+        method: "POST",
+        body: formData,
+      });
+      const response = await res.json();
+      if (response.success) {
+        setCustomStatus("✅ Image uploaded!");
+        fetchCustomMaps();
+      } else {
+        console.error("Failed to upload custom map:", response.error);
+        setCustomStatus("❌ Upload failed.");
+      }
+    } catch (error) {
+      console.error("Error uploading custom map:", error);
       setCustomStatus("❌ Upload failed.");
     }
   };

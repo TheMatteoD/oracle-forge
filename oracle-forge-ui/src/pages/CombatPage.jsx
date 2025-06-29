@@ -11,27 +11,45 @@ export default function CombatPage() {
   const [defenderName, setDefenderName] = useState("");
 
   const startCombat = async () => {
-    const res = await fetch(`${API_BASE}/combat/start`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ monsters: ["Acolyte"] })
-    });
-    const data = await res.json();
-    setCombatState(data);
-    setCombatLog(["Combat started!"].concat(data.initiative_order.map(n => `Initiative: ${n}`)));
+    try {
+      const res = await fetch(`${API_BASE}/combat/start`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ monsters: ["Acolyte"] })
+      });
+      const response = await res.json();
+      if (response.success) {
+        const data = response.data;
+        setCombatState(data);
+        setCombatLog(["Combat started!"].concat(data.initiative_order.map(n => `Initiative: ${n}`)));
+      } else {
+        console.error("Failed to start combat:", response.error);
+      }
+    } catch (error) {
+      console.error("Error starting combat:", error);
+    }
   };
 
   const performAttack = async () => {
     const attacker = combatState.combat_state[attackerName];
     const defender = combatState.combat_state[defenderName];
 
-    const res = await fetch(`${API_BASE}/combat/attack`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ attacker, defender })
-    });
-    const data = await res.json();
-    setCombatLog(log => [...log, `${data.attacker} attacks ${data.defender}: ${data.hit ? `Hits for ${data.damage}` : "Missed"}`]);
+    try {
+      const res = await fetch(`${API_BASE}/combat/attack`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ attacker, defender })
+      });
+      const response = await res.json();
+      if (response.success) {
+        const data = response.data;
+        setCombatLog(log => [...log, `${data.attacker} attacks ${data.defender}: ${data.hit ? `Hits for ${data.damage}` : "Missed"}`]);
+      } else {
+        console.error("Failed to perform attack:", response.error);
+      }
+    } catch (error) {
+      console.error("Error performing attack:", error);
+    }
   };
 
   return (

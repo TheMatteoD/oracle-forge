@@ -10,12 +10,32 @@ export default function AdventureSelector({ onSelect }) {
   useEffect(() => {
     fetch(`${API_BASE}/adventures/list`)
       .then((res) => res.json())
-      .then(setAdventures);
+      .then((response) => {
+        if (response.success) {
+          setAdventures(response.data || []);
+        } else {
+          console.error("Failed to fetch adventures:", response.error);
+          setAdventures([]);
+        }
+      })
+      .catch((error) => {
+        console.error("Error fetching adventures:", error);
+        setAdventures([]);
+      });
   }, []);
 
   const selectAdventure = async (adventure) => {
-    await fetch(`${API_BASE}/adventures/select/${adventure}`, { method: "POST" });
-    onSelect(adventure);
+    try {
+      const response = await fetch(`${API_BASE}/adventures/select/${adventure}`, { method: "POST" });
+      const result = await response.json();
+      if (result.success) {
+        onSelect(adventure);
+      } else {
+        console.error("Failed to select adventure:", result.error);
+      }
+    } catch (error) {
+      console.error("Error selecting adventure:", error);
+    }
   };
 
   const createAdventure = async () => {

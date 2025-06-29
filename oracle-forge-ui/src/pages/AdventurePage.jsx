@@ -12,14 +12,17 @@ export default function AdventurePage() {
   useEffect(() => {
     fetch(`${API_BASE}/adventures/active`)
       .then(res => res.json())
-      .then(data => {
-        if (data.active) {
-          setActiveAdventure(data.active);
+      .then(response => {
+        if (response.success && response.data?.active) {
+          setActiveAdventure(response.data.active);
         } else {
           setActiveAdventure(null);
         }
       })
-      .catch(console.warn);
+      .catch(error => {
+        console.error("Error fetching active adventure:", error);
+        setActiveAdventure(null);
+      });
   }, []);
   
   return (

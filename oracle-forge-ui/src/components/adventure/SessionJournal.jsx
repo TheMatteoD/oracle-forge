@@ -13,11 +13,20 @@ export default function SessionJournal() {
     setLoading(true);
     fetch(`${API_BASE}/session/log`)
       .then(res => res.json())
-      .then(data => {
-        setLog(Array.isArray(data) ? data : []);
+      .then(response => {
+        if (response.success) {
+          setLog(Array.isArray(response.data) ? response.data : []);
+        } else {
+          console.error("Failed to fetch log:", response.error);
+          setLog([]);
+        }
         setLoading(false);
       })
-      .catch(() => setLoading(false));
+      .catch(error => {
+        console.error("Error fetching log:", error);
+        setLog([]);
+        setLoading(false);
+      });
   };
 
   useEffect(() => {
@@ -26,17 +35,23 @@ export default function SessionJournal() {
 
   const submitNote = async () => {
     if (!note.trim()) return;
-    const res = await fetch(`${API_BASE}/session/log`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ content: note, type: "note" }),
-    });
-    const data = await res.json();
-    if (data.success) {
-      setNote("");
-      setStatus("Saved!");
-      fetchLog();
-    } else {
+    try {
+      const res = await fetch(`${API_BASE}/session/log`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ content: note, type: "note" }),
+      });
+      const response = await res.json();
+      if (response.success) {
+        setNote("");
+        setStatus("Saved!");
+        fetchLog();
+      } else {
+        console.error("Failed to save note:", response.error);
+        setStatus("Error saving note.");
+      }
+    } catch (error) {
+      console.error("Error saving note:", error);
       setStatus("Error saving note.");
     }
   };

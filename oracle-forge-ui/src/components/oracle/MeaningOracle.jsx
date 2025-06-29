@@ -37,7 +37,18 @@ export default function MeaningOracle({ chaos }) {
   useEffect(() => {
     fetch(`${API}/oracle/meaning/tables`)
       .then(res => res.json())
-      .then(setTables);
+      .then(response => {
+        if (response.success) {
+          setTables(response.data || []);
+        } else {
+          console.error("Failed to fetch tables:", response.error);
+          setTables([]);
+        }
+      })
+      .catch(error => {
+        console.error("Error fetching tables:", error);
+        setTables([]);
+      });
   }, []);
 
   const handleMeaning = async () => {
@@ -45,15 +56,27 @@ export default function MeaningOracle({ chaos }) {
     setFlavorData(null);
     setOutput('');
     setFlavorText('');
-    const res = await fetch(`${API}/oracle/meaning`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ question, table: selectedTable })
-    });
-    const data = await res.json();
-    setOutput(`Key words: ${data.keywords.join(', ')}\nRolls: ${data.rolls.join(', ')}`);
-    setFlavorData({ question, keywords: data.keywords });
-    setLoading(false);
+    try {
+      const res = await fetch(`${API}/oracle/meaning`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ question, table: selectedTable })
+      });
+      const response = await res.json();
+      if (response.success) {
+        const data = response.data;
+        setOutput(`Key words: ${data.keywords.join(', ')}\nRolls: ${data.rolls.join(', ')}`);
+        setFlavorData({ question, keywords: data.keywords });
+      } else {
+        console.error("Failed to get meaning:", response.error);
+        setOutput("Error: Failed to get meaning");
+      }
+    } catch (error) {
+      console.error("Error getting meaning:", error);
+      setOutput("Error: Failed to get meaning");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleFlavor = async () => {
@@ -65,10 +88,15 @@ export default function MeaningOracle({ chaos }) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(flavorData)
       });
-      const data = await res.json();
-      setOutput((prev) => `${prev}\n\n${data.narration}`);
-      setFlavorText(data.narration);
-      setFlavorData(null);
+      const response = await res.json();
+      if (response.success) {
+        const data = response.data;
+        setOutput((prev) => `${prev}\n\n${data.narration}`);
+        setFlavorText(data.narration);
+        setFlavorData(null);
+      } else {
+        console.error("Failed to get flavor:", response.error);
+      }
     } catch (error) {
       console.error("Failed to fetch flavor for meaning:", error);
     } finally {

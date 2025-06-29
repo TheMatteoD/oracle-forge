@@ -21,8 +21,13 @@ export default function CharacterPage() {
         if (!response.ok) {
           throw new Error('Character not found');
         }
-        const data = await response.json();
-        setCharacter(data.character);
+        const result = await response.json();
+        if (result.success) {
+          setCharacter(result.data?.character);
+        } else {
+          console.error("Failed to load character:", result.error);
+          throw new Error(result.error || 'Failed to load character');
+        }
       } catch (err) {
         setError(err.message);
       } finally {

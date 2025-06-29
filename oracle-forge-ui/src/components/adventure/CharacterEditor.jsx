@@ -109,8 +109,13 @@ export default function CharacterEditor({ character, onCharacterUpdated, onCance
         throw new Error('Failed to update character');
       }
 
-      const data = await response.json();
-      onCharacterUpdated(data.character);
+      const result = await response.json();
+      if (result.success) {
+        onCharacterUpdated(result.data?.character);
+      } else {
+        console.error("Failed to update character:", result.error);
+        throw new Error(result.error || 'Failed to update character');
+      }
     } catch (err) {
       setError(err.message);
     } finally {
