@@ -4,7 +4,7 @@ from werkzeug.utils import secure_filename
 from ..services.adventure import AdventureService
 from ..config import get_config
 from ..utils.responses import APIResponse, handle_service_response
-from ..utils.validation import validate_json_body, validate_enum_field
+from ..utils.validation import validate_json_body, validate_field
 import logging
 
 adventure = Blueprint('adventure', __name__)
@@ -140,21 +140,21 @@ def update_world_state(adv):
 ENTITY_TYPES = ["npcs", "factions", "locations", "story_lines"]
 
 @adventure.route("/adventures/<adv>/world/<entity_type>", methods=["GET"])
-@validate_enum_field("entity_type", ENTITY_TYPES, allow_none=False)
+@validate_field("entity_type", allowed_values=ENTITY_TYPES, allow_none=False)
 def list_entities(adv, entity_type):
     """List entities of a specific type"""
     result = adventure_service.list_world_entities(adv, entity_type)
     return handle_service_response(result, "entities")
 
 @adventure.route("/adventures/<adv>/world/<entity_type>/<entity_name>", methods=["GET"])
-@validate_enum_field("entity_type", ENTITY_TYPES, allow_none=False)
+@validate_field("entity_type", allowed_values=ENTITY_TYPES, allow_none=False)
 def get_entity(adv, entity_type, entity_name):
     """Get a specific entity"""
     result = adventure_service.get_world_entity(adv, entity_type, entity_name)
     return handle_service_response(result)
 
 @adventure.route("/adventures/<adv>/world/<entity_type>/<entity_name>", methods=["POST"])
-@validate_enum_field("entity_type", ENTITY_TYPES, allow_none=False)
+@validate_field("entity_type", allowed_values=ENTITY_TYPES, allow_none=False)
 @validate_json_body(required_fields=["entity_data"])
 def create_or_update_entity(adv, entity_type, entity_name):
     """Create or update an entity"""
@@ -164,7 +164,7 @@ def create_or_update_entity(adv, entity_type, entity_name):
     return handle_service_response(result)
 
 @adventure.route("/adventures/<adv>/world/<entity_type>/<entity_name>", methods=["DELETE"])
-@validate_enum_field("entity_type", ENTITY_TYPES, allow_none=False)
+@validate_field("entity_type", allowed_values=ENTITY_TYPES, allow_none=False)
 def delete_entity(adv, entity_type, entity_name):
     """Delete an entity"""
     result = adventure_service.delete_world_entity(adv, entity_type, entity_name)

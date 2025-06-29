@@ -3,13 +3,14 @@ from flask import Flask
 from flask_cors import CORS
 from .routes.oracle import oracle
 from .routes.lookup import lookup
-from .routes.adventure import adventure, reset_active_adventure
+from .routes.adventure import adventure
 from .routes.generators import generators
 from .routes.combat import combat_bp
 from .routes.session import session
 from .config import get_config, config_manager
 from .middleware.error_handlers import register_error_handlers
 from .middleware.rate_limiting import register_rate_limiting
+from .services.adventure import AdventureService
 
 # Configure logging
 logging.basicConfig(
@@ -44,7 +45,8 @@ app.register_blueprint(combat_bp)
 app.register_blueprint(session)
 
 # Game Init - clears active adventure on startup
-reset_active_adventure()
+adventure_service = AdventureService()
+adventure_service.clear_active_adventure()
 
 # Add configuration endpoint for debugging
 @app.route("/config/status", methods=["GET"])

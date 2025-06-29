@@ -2,7 +2,7 @@ from flask import Blueprint, request, g
 import logging
 from ..services.oracle import OracleService
 from ..utils.responses import APIResponse, handle_service_response
-from ..utils.validation import validate_json_body, validate_field, validate_enum_field
+from ..utils.validation import validate_json_body, validate_field
 
 oracle = Blueprint('oracle', __name__)
 oracle_service = OracleService()
@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 @oracle.route("/oracle/yesno", methods=["POST"])
 @validate_json_body(required_fields=["question"])
 @validate_field("chaos", field_type=int, min_value=1, max_value=9, allow_none=True)
-@validate_enum_field("odds", ["50/50", "likely", "unlikely"], allow_none=True)
+@validate_field("odds", allowed_values=["50/50", "likely", "unlikely"], allow_none=True)
 def oracle_yesno():
     """Oracle Yes/No query endpoint"""
     data = g.request_data
