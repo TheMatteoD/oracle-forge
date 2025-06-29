@@ -8,6 +8,7 @@ the Oracle Forge application.
 from . import paths
 from . import responses
 from . import validation
+from . import route_utils
 
 from .paths import (
     get_vault_path,
@@ -38,6 +39,7 @@ __all__ = [
     'paths',
     'responses',
     'validation',
+    'route_utils',
     'get_vault_path',
     'get_vault_templates_path',
     'get_adventures_path',

@@ -21,50 +21,30 @@ logger = logging.getLogger(__name__)
 @generators.route("/generators/categories", methods=["GET"])
 def list_categories():
     """List all available generator categories"""
-    try:
-        categories = generator_service.list_generator_types()
-        return jsonify(categories)
-    except Exception as e:
-        # Only catch unexpected system errors
-        logger.error(f"Unexpected error in list_categories: {e}")
-        return jsonify({"error": "Internal server error"}), 500
+    categories = generator_service.list_generator_types()
+    return APIResponse.success(categories)
 
 
 @generators.route("/generators/<category>/files", methods=["GET"])
 def list_files(category):
     """List all generator files in a category"""
-    try:
-        files = generator_service.list_generators(category)
-        return jsonify(files)
-    except Exception as e:
-        # Only catch unexpected system errors
-        logger.error(f"Unexpected error in list_files: {e}")
-        return jsonify({"error": "Internal server error"}), 500
+    files = generator_service.list_generators(category)
+    return APIResponse.success(files)
 
 
 @generators.route("/generators/<category>/<filename>/tables", methods=["GET"])
 def list_tables(category, filename):
     """List all tables in a generator file"""
-    try:
-        generator_data = generator_service.get_generator(category, filename)
-        table_ids = [table.get('id') for table in generator_data.get('tables', []) if table.get('id')]
-        return jsonify(table_ids)
-    except Exception as e:
-        # Only catch unexpected system errors
-        logger.error(f"Unexpected error in list_tables: {e}")
-        return jsonify({"error": "Internal server error"}), 500
+    generator_data = generator_service.get_generator(category, filename)
+    table_ids = [table.get('id') for table in generator_data.get('tables', []) if table.get('id')]
+    return APIResponse.success(table_ids)
 
 
 @generators.route("/generators/custom", methods=["GET"])
 def list_custom_generators():
     """List all available custom generators"""
-    try:
-        custom_generators = generator_service.list_custom_generators()
-        return jsonify(custom_generators)
-    except Exception as e:
-        # Only catch unexpected system errors
-        logger.error(f"Unexpected error in list_custom_generators: {e}")
-        return jsonify({"error": "Internal server error"}), 500
+    custom_generators = generator_service.list_custom_generators()
+    return APIResponse.success(custom_generators)
 
 
 @generators.route("/generators/custom/<category>/<system>/<generator_id>", methods=["POST"])

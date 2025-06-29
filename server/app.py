@@ -9,6 +9,7 @@ from .routes.combat import combat_bp
 from .routes.session import session
 from .config import get_config, config_manager
 from .middleware.error_handlers import register_error_handlers
+from .middleware.rate_limiting import register_rate_limiting
 
 # Configure logging
 logging.basicConfig(
@@ -30,8 +31,9 @@ if config.server.secret_key:
 else:
     app.secret_key = 'dev-secret-key-change-in-production'
 
-# Register error handlers
+# Register middleware
 register_error_handlers(app)
+register_rate_limiting(app)
 
 # Register blueprints
 app.register_blueprint(oracle)
