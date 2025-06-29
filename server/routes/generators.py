@@ -7,13 +7,14 @@ This module provides API endpoints for generator operations including:
 - Generator flavoring and narration
 """
 
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, g
 import logging
 from ..services.generator import GeneratorService
+from ..utils.responses import APIResponse, handle_service_response
+from ..utils.validation import validate_field, validate_json_body, validate_query_params
 
 generators = Blueprint("generators", __name__)
 generator_service = GeneratorService()
-
 logger = logging.getLogger(__name__)
 
 
@@ -67,187 +68,108 @@ def list_custom_generators():
 
 
 @generators.route("/generators/custom/<category>/<system>/<generator_id>", methods=["POST"])
+@validate_field("parameters", field_type=dict, allow_none=True)
 def run_custom_generator(category, system, generator_id):
     """Execute a custom generator"""
-    try:
-        data = request.get_json() or {}
-        parameters = data.get('parameters', {})
-        
-        result = generator_service.execute_custom_generator(category, system, generator_id, parameters)
-        if result.get("success"):
-            return jsonify(result)
-        else:
-            return jsonify({"error": result.get("error", "Unknown error")}), 400
-    except Exception as e:
-        # Only catch unexpected system errors
-        logger.error(f"Unexpected error in run_custom_generator: {e}")
-        return jsonify({"error": "Internal server error"}), 500
+    data = g.request_data or {}
+    parameters = data.get('parameters', {})
+    
+    result = generator_service.execute_custom_generator(category, system, generator_id, parameters)
+    return handle_service_response(result)
 
 
 @generators.route("/generators/roll", methods=["POST"])
+@validate_json_body(required_fields=["category", "file", "table_id"])
 def roll_table():
     """Roll on a specific table within a generator"""
-    # HTTP-specific validation
-    data = request.get_json()
-    if not data:
-        return jsonify({"error": "Request body is required"}), 400
+    data = g.request_data
     
     category = data.get("category")
     filename = data.get("file")
     table_id = data.get("table_id")
     
-    if not all([category, filename, table_id]):
-        return jsonify({"error": "category, file, and table_id are required"}), 400
-    
-    try:
-        result = generator_service.roll_table(category, filename, table_id)
-        if result.get("success"):
-            return jsonify(result)
-        else:
-            return jsonify({"error": result.get("error", "Unknown error")}), 400
-    except Exception as e:
-        # Only catch unexpected system errors
-        logger.error(f"Unexpected error in roll_table: {e}")
-        return jsonify({"error": "Internal server error"}), 500
+    result = generator_service.roll_table(category, filename, table_id)
+    return handle_service_response(result)
 
 
 @generators.route("/generators/flavor", methods=["POST"])
+@validate_field("context", field_type=str, allow_none=True)
+@validate_field("data", field_type=dict, allow_none=True)
+@validate_field("category", field_type=str, allow_none=True)
+@validate_field("source", field_type=str, allow_none=True)
 def generate_flavor():
     """Generate flavored narration for generator results"""
-    try:
-        data = request.get_json() or {}
-        
-        context = data.get("context", "")
-        result_data = data.get("data", {})
-        category = data.get("category", "")
-        source = data.get("source", "")
-        
-        result = generator_service.generate_flavor(context, result_data, category, source)
-        if result.get("success"):
-            return jsonify({"narration": result.get("narration")})
-        else:
-            return jsonify({"error": result.get("error", "Unknown error")}), 400
-    except Exception as e:
-        # Only catch unexpected system errors
-        logger.error(f"Unexpected error in generate_flavor: {e}")
-        return jsonify({"error": "Internal server error"}), 500
+    data = g.request_data or {}
+    
+    context = data.get("context", "")
+    result_data = data.get("data", {})
+    category = data.get("category", "")
+    source = data.get("source", "")
+    
+    result = generator_service.generate_flavor(context, result_data, category, source)
+    return handle_service_response(result, "narration")
 
 
 # Additional CRUD endpoints for generators
 @generators.route("/generators/<category>/<filename>", methods=["GET"])
 def get_generator(category, filename):
     """Get a specific generator"""
-    try:
-        generator_data = generator_service.get_generator(category, filename)
-        if generator_data:
-            return jsonify(generator_data)
-        else:
-            return jsonify({"error": f"Generator '{filename}' not found"}), 404
-    except Exception as e:
-        # Only catch unexpected system errors
-        logger.error(f"Unexpected error in get_generator: {e}")
-        return jsonify({"error": "Internal server error"}), 500
+    generator_data = generator_service.get_generator(category, filename)
+    if generator_data:
+        return APIResponse.success(generator_data)
+    else:
+        return APIResponse.not_found(f"Generator '{filename}' not found")
 
 
 @generators.route("/generators/<category>", methods=["POST"])
+@validate_json_body(required_fields=["name"])
 def create_generator(category):
     """Create a new generator in a category"""
-    # HTTP-specific validation
-    data = request.get_json()
-    if not data:
-        return jsonify({"error": "Request body is required"}), 400
+    data = g.request_data
     
-    try:
-        result = generator_service.create_generator(category, data)
-        if result.get("success"):
-            return jsonify(result.get("generator")), 201
-        else:
-            return jsonify({"error": result.get("error", "Unknown error")}), 400
-    except Exception as e:
-        # Only catch unexpected system errors
-        logger.error(f"Unexpected error in create_generator: {e}")
-        return jsonify({"error": "Internal server error"}), 500
+    result = generator_service.create_generator(category, data)
+    return handle_service_response(result, "generator")
 
 
 @generators.route("/generators/<category>/<filename>", methods=["PUT"])
+@validate_json_body(required_fields=["name"])
 def update_generator(category, filename):
     """Update a specific generator"""
-    # HTTP-specific validation
-    data = request.get_json()
-    if not data:
-        return jsonify({"error": "Request body is required"}), 400
+    data = g.request_data
     
-    try:
-        result = generator_service.update_generator(category, filename, data)
-        if result.get("success"):
-            return jsonify(result.get("generator"))
-        else:
-            return jsonify({"error": result.get("error", "Unknown error")}), 400
-    except Exception as e:
-        # Only catch unexpected system errors
-        logger.error(f"Unexpected error in update_generator: {e}")
-        return jsonify({"error": "Internal server error"}), 500
+    result = generator_service.update_generator(category, filename, data)
+    return handle_service_response(result, "generator")
 
 
 @generators.route("/generators/<category>/<filename>", methods=["DELETE"])
 def delete_generator(category, filename):
     """Delete a specific generator"""
-    try:
-        result = generator_service.delete_generator(category, filename)
-        if result.get("success"):
-            return jsonify({"message": result.get("message")}), 200
-        else:
-            return jsonify({"error": result.get("error", "Unknown error")}), 400
-    except Exception as e:
-        # Only catch unexpected system errors
-        logger.error(f"Unexpected error in delete_generator: {e}")
-        return jsonify({"error": "Internal server error"}), 500
+    result = generator_service.delete_generator(category, filename)
+    return handle_service_response(result)
 
 
 @generators.route("/generators/search", methods=["GET"])
+@validate_query_params(required_params=["q"])
 def search_generators():
     """Search for generators"""
-    # HTTP-specific validation
-    query = request.args.get("q", "")
-    generator_type = request.args.get("type")
+    params = g.query_params
     
-    if not query:
-        return jsonify({"error": "Query parameter 'q' is required"}), 400
+    query = params.get("q", "")
+    generator_type = params.get("type")
     
-    try:
-        results = generator_service.search_generators(query, generator_type)
-        return jsonify(results)
-    except Exception as e:
-        # Only catch unexpected system errors
-        logger.error(f"Unexpected error in search_generators: {e}")
-        return jsonify({"error": "Internal server error"}), 500
+    results = generator_service.search_generators(query, generator_type)
+    return APIResponse.success(results)
 
 
 @generators.route("/generators/<category>/<filename>/statistics", methods=["GET"])
 def get_generator_statistics(category, filename):
     """Get statistics about a generator"""
-    try:
-        result = generator_service.get_generator_statistics(category, filename)
-        if result.get("success"):
-            return jsonify(result.get("statistics"))
-        else:
-            return jsonify({"error": result.get("error", "Unknown error")}), 400
-    except Exception as e:
-        # Only catch unexpected system errors
-        logger.error(f"Unexpected error in get_generator_statistics: {e}")
-        return jsonify({"error": "Internal server error"}), 500
+    result = generator_service.get_generator_statistics(category, filename)
+    return handle_service_response(result, "statistics")
 
 
 @generators.route("/generators/<category>/<filename>/validate", methods=["GET"])
 def validate_generator(category, filename):
     """Validate a generator's structure"""
-    try:
-        result = generator_service.validate_generator(category, filename)
-        if result.get("success"):
-            return jsonify(result.get("validation"))
-        else:
-            return jsonify({"error": result.get("error", "Unknown error")}), 400
-    except Exception as e:
-        # Only catch unexpected system errors
-        logger.error(f"Unexpected error in validate_generator: {e}")
-        return jsonify({"error": "Internal server error"}), 500
+    result = generator_service.validate_generator(category, filename)
+    return handle_service_response(result, "validation")
