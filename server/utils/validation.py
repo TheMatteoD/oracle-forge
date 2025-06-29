@@ -115,6 +115,19 @@ def validate_field(field_name: str, field_type: Optional[type] = None,
     def decorator(func: Callable) -> Callable:
         @functools.wraps(func)
         def wrapper(*args, **kwargs):
+            
+            if field_name in kwargs:
+                value = kwargs[field_name]
+                if allowed_values:
+                    if not (allow_none and value is None) and value not in allowed_values:
+                        raise ValidationError(
+                            f"Invalid {field_name!r}: must be one of {list(allowed_values)}",
+                            field=field_name
+                        )
+
+                return func(*args, **kwargs)
+
+
             try:
                 data = getattr(g, 'request_data', request.get_json() or {})
                 
