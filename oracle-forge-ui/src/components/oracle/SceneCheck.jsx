@@ -1,7 +1,5 @@
 import React, { useState } from 'react';
-import config from "../../config";
-
-const API = config.SERVER_URL;
+import { apiPost } from '../../api/apiClient';
 
 function LogModal({ open, onClose, logText, onSave, saving, error }) {
   const [text, setText] = useState(logText);
@@ -33,7 +31,7 @@ export default function SceneCheck({ chaos }) {
   const [logSaving, setLogSaving] = useState(false);
 
   const handleScene = async () => {
-    const res = await fetch(`${API}/oracle/scene`, {
+    const res = await apiPost('/oracle/scene', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ chaos, flavor: false })
@@ -58,7 +56,7 @@ export default function SceneCheck({ chaos }) {
   const handleFlavor = async () => {
     setLoading(true);
     try {
-      const res = await fetch(`${API}/oracle/scene/flavor`, {
+      const res = await apiPost('/oracle/scene/flavor', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(flavorData)
@@ -83,7 +81,7 @@ export default function SceneCheck({ chaos }) {
     setLogSaving(true);
     setLogError(null);
     try {
-      const res = await fetch(`${API}/session/log`, {
+      const res = await apiPost('/session/log', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ content: text, type: 'oracle' })

@@ -1,7 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import config from "../../config";
-
-const API = config.SERVER_URL;
+import { apiPost } from '../../api/apiClient';
 
 function LogModal({ open, onClose, logText, onSave, saving, error }) {
   const [text, setText] = useState(logText);
@@ -35,8 +33,7 @@ export default function MeaningOracle({ chaos }) {
   const [logSaving, setLogSaving] = useState(false);
 
   useEffect(() => {
-    fetch(`${API}/oracle/meaning/tables`)
-      .then(res => res.json())
+    apiPost('/oracle/meaning/tables')
       .then(response => {
         if (response.success) {
           setTables(response.data || []);
@@ -57,11 +54,7 @@ export default function MeaningOracle({ chaos }) {
     setOutput('');
     setFlavorText('');
     try {
-      const res = await fetch(`${API}/oracle/meaning`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ question, table: selectedTable })
-      });
+      const res = await apiPost('/oracle/meaning', { question, table: selectedTable });
       const response = await res.json();
       if (response.success) {
         const data = response.data;
@@ -83,11 +76,7 @@ export default function MeaningOracle({ chaos }) {
     if (!flavorData) return;
     setLoading(true);
     try {
-      const res = await fetch(`${API}/oracle/meaning/flavor`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(flavorData)
-      });
+      const res = await apiPost('/oracle/meaning/flavor', flavorData);
       const response = await res.json();
       if (response.success) {
         const data = response.data;
@@ -113,11 +102,7 @@ export default function MeaningOracle({ chaos }) {
     setLogSaving(true);
     setLogError(null);
     try {
-      const res = await fetch(`${API}/session/log`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ content: text, type: 'oracle' })
-      });
+      const res = await apiPost('/session/log', { content: text, type: 'oracle' });
       const data = await res.json();
       if (data.success) {
         setShowLogModal(false);

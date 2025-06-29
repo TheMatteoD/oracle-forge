@@ -1,7 +1,5 @@
 import React, { useEffect, useState } from "react";
-import config from "../../config";
-
-const API_BASE = config.SERVER_URL;
+import { apiGet, apiPost, apiDelete } from '../../api/apiClient';
 
 function FactionsSection({ adventure }) {
   const [factions, setFactions] = useState([]);
@@ -13,8 +11,7 @@ function FactionsSection({ adventure }) {
 
   const fetchFactions = () => {
     setLoading(true);
-    fetch(`${API_BASE}/adventures/${adventure}/world/factions`)
-      .then(res => res.json())
+    apiGet(`/adventures/${adventure}/world/factions`)
       .then(response => {
         if (response.success) {
           setFactions(response.data || []);
@@ -40,10 +37,7 @@ function FactionsSection({ adventure }) {
 
   const handleAdd = () => {
     setLoading(true);
-    fetch(`${API_BASE}/adventures/${adventure}/world/factions/${encodeURIComponent(form.name)}`, {
-      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(form)
-    })
-      .then(res => res.json())
+    apiPost(`/adventures/${adventure}/world/factions/${encodeURIComponent(form.name)}`, form)
       .then(response => {
         if (response.success) {
           setShowAdd(false);
@@ -67,10 +61,7 @@ function FactionsSection({ adventure }) {
 
   const handleUpdate = () => {
     setLoading(true);
-    fetch(`${API_BASE}/adventures/${adventure}/world/factions/${encodeURIComponent(editFaction)}`, {
-      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(form)
-    })
-      .then(res => res.json())
+    apiPost(`/adventures/${adventure}/world/factions/${encodeURIComponent(editFaction)}`, form)
       .then(response => {
         if (response.success) {
           setEditFaction(null);
@@ -90,8 +81,7 @@ function FactionsSection({ adventure }) {
   const handleDelete = (name) => {
     if (!window.confirm(`Delete faction '${name}'?`)) return;
     setLoading(true);
-    fetch(`${API_BASE}/adventures/${adventure}/world/factions/${encodeURIComponent(name)}`, { method: 'DELETE' })
-      .then(res => res.json())
+    apiDelete(`/adventures/${adventure}/world/factions/${encodeURIComponent(name)}`)
       .then(response => {
         if (response.success) {
           fetchFactions();
@@ -154,8 +144,7 @@ function LocationsSection({ adventure }) {
 
   const fetchLocations = () => {
     setLoading(true);
-    fetch(`${API_BASE}/adventures/${adventure}/world/locations`)
-      .then(res => res.json())
+    apiGet(`/adventures/${adventure}/world/locations`)
       .then(response => {
         if (response.success) {
           setLocations(response.data || []);
@@ -178,10 +167,7 @@ function LocationsSection({ adventure }) {
   
   const handleAdd = () => {
     setLoading(true);
-    fetch(`${API_BASE}/adventures/${adventure}/world/locations/${encodeURIComponent(form.name)}`, {
-      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(form)
-    })
-      .then(res => res.json())
+    apiPost(`/adventures/${adventure}/world/locations/${encodeURIComponent(form.name)}`, form)
       .then(response => {
         if (response.success) {
           setShowAdd(false);
@@ -202,10 +188,7 @@ function LocationsSection({ adventure }) {
   
   const handleUpdate = () => {
     setLoading(true);
-    fetch(`${API_BASE}/adventures/${adventure}/world/locations/${encodeURIComponent(editLocation)}`, {
-      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(form)
-    })
-      .then(res => res.json())
+    apiPost(`/adventures/${adventure}/world/locations/${encodeURIComponent(editLocation)}`, form)
       .then(response => {
         if (response.success) {
           setEditLocation(null);
@@ -225,8 +208,7 @@ function LocationsSection({ adventure }) {
   const handleDelete = (name) => {
     if (!window.confirm(`Delete location '${name}'?`)) return;
     setLoading(true);
-    fetch(`${API_BASE}/adventures/${adventure}/world/locations/${encodeURIComponent(name)}`, { method: 'DELETE' })
-      .then(res => res.json())
+    apiDelete(`/adventures/${adventure}/world/locations/${encodeURIComponent(name)}`)
       .then(response => {
         if (response.success) {
           fetchLocations();
@@ -289,8 +271,7 @@ function StoryLinesSection({ adventure }) {
 
   const fetchStoryLines = () => {
     setLoading(true);
-    fetch(`${API_BASE}/adventures/${adventure}/world/story_lines`)
-      .then(res => res.json())
+    apiGet(`/adventures/${adventure}/world/story_lines`)
       .then(response => {
         if (response.success) {
           setStoryLines(response.data || []);
@@ -313,10 +294,7 @@ function StoryLinesSection({ adventure }) {
   
   const handleAdd = () => {
     setLoading(true);
-    fetch(`${API_BASE}/adventures/${adventure}/world/story_lines/${encodeURIComponent(form.name)}`, {
-      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(form)
-    })
-      .then(res => res.json())
+    apiPost(`/adventures/${adventure}/world/story_lines/${encodeURIComponent(form.name)}`, form)
       .then(response => {
         if (response.success) {
           setShowAdd(false);
@@ -337,10 +315,7 @@ function StoryLinesSection({ adventure }) {
   
   const handleUpdate = () => {
     setLoading(true);
-    fetch(`${API_BASE}/adventures/${adventure}/world/story_lines/${encodeURIComponent(editStory)}`, {
-      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(form)
-    })
-      .then(res => res.json())
+    apiPost(`/adventures/${adventure}/world/story_lines/${encodeURIComponent(editStory)}`, form)
       .then(response => {
         if (response.success) {
           setEditStory(null);
@@ -360,8 +335,7 @@ function StoryLinesSection({ adventure }) {
   const handleDelete = (name) => {
     if (!window.confirm(`Delete story line '${name}'?`)) return;
     setLoading(true);
-    fetch(`${API_BASE}/adventures/${adventure}/world/story_lines/${encodeURIComponent(name)}`, { method: 'DELETE' })
-      .then(res => res.json())
+    apiDelete(`/adventures/${adventure}/world/story_lines/${encodeURIComponent(name)}`)
       .then(response => {
         if (response.success) {
           fetchStoryLines();
@@ -424,8 +398,7 @@ function NPCsSection({ adventure }) {
 
   const fetchNpcs = () => {
     setLoading(true);
-    fetch(`${API_BASE}/adventures/${adventure}/world/npcs`)
-      .then(res => res.json())
+    apiGet(`/adventures/${adventure}/world/npcs`)
       .then(response => {
         if (response.success) {
           setNpcs(response.data || []);
@@ -448,10 +421,7 @@ function NPCsSection({ adventure }) {
   
   const handleAdd = () => {
     setLoading(true);
-    fetch(`${API_BASE}/adventures/${adventure}/world/npcs/${encodeURIComponent(form.name)}`, {
-      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(form)
-    })
-      .then(res => res.json())
+    apiPost(`/adventures/${adventure}/world/npcs/${encodeURIComponent(form.name)}`, form)
       .then(response => {
         if (response.success) {
           setShowAdd(false);
@@ -472,10 +442,7 @@ function NPCsSection({ adventure }) {
   
   const handleUpdate = () => {
     setLoading(true);
-    fetch(`${API_BASE}/adventures/${adventure}/world/npcs/${encodeURIComponent(editNpc)}`, {
-      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(form)
-    })
-      .then(res => res.json())
+    apiPost(`/adventures/${adventure}/world/npcs/${encodeURIComponent(editNpc)}`, form)
       .then(response => {
         if (response.success) {
           setEditNpc(null);
@@ -495,8 +462,7 @@ function NPCsSection({ adventure }) {
   const handleDelete = (name) => {
     if (!window.confirm(`Delete NPC '${name}'?`)) return;
     setLoading(true);
-    fetch(`${API_BASE}/adventures/${adventure}/world/npcs/${encodeURIComponent(name)}`, { method: 'DELETE' })
-      .then(res => res.json())
+    apiDelete(`/adventures/${adventure}/world/npcs/${encodeURIComponent(name)}`)
       .then(response => {
         if (response.success) {
           fetchNpcs();
@@ -562,8 +528,7 @@ export default function WorldSummary({ adventure }) {
   
   useEffect(() => {
     if (!adventure) return;
-    fetch(`${API_BASE}/adventures/${adventure}/world_state`)
-      .then((res) => res.json())
+    apiGet(`/adventures/${adventure}/world_state`)
       .then((data) => {
         setWorld(data || {});
         setForm({
@@ -582,17 +547,12 @@ export default function WorldSummary({ adventure }) {
   const handleSave = () => {
     setLoading(true);
     setError(null);
-    fetch(`${API_BASE}/adventures/${adventure}/world_state`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        ...world,
-        chaos_factor: form.chaos_factor,
-        current_scene: form.current_scene,
-        days_passed: form.days_passed
-      })
+    apiPost(`/adventures/${adventure}/world_state`, {
+      ...world,
+      chaos_factor: form.chaos_factor,
+      current_scene: form.current_scene,
+      days_passed: form.days_passed
     })
-      .then((res) => res.json())
       .then((data) => {
         setEdit(false);
         setLoading(false);

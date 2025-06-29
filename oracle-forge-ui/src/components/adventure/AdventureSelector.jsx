@@ -1,15 +1,12 @@
 import React, { useEffect, useState } from "react";
-import config from "../../config";
-
-const API_BASE = config.SERVER_URL;
+import { apiGet, apiPost } from '../../api/apiClient';
 
 export default function AdventureSelector({ onSelect }) {
   const [adventures, setAdventures] = useState([]);
   const [newAdvName, setNewAdvName] = useState("");
 
   useEffect(() => {
-    fetch(`${API_BASE}/adventures/list`)
-      .then((res) => res.json())
+    apiGet('/adventures/list')
       .then((response) => {
         if (response.success) {
           setAdventures(response.data || []);
@@ -26,8 +23,7 @@ export default function AdventureSelector({ onSelect }) {
 
   const selectAdventure = async (adventure) => {
     try {
-      const response = await fetch(`${API_BASE}/adventures/select/${adventure}`, { method: "POST" });
-      const result = await response.json();
+      const result = await apiPost(`/adventures/select/${adventure}`, {});
       if (result.success) {
         onSelect(adventure);
       } else {

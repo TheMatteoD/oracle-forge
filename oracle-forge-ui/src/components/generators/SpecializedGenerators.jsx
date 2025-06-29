@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
-import config from "../../config";
+import { apiGet, apiPost } from '../../api/apiClient';
 
-const API_BASE = config.SERVER_URL;
 
 export default function SpecializedGenerators() {
   const [generators, setGenerators] = useState({});
@@ -11,15 +10,12 @@ export default function SpecializedGenerators() {
   const [flavorLoading, setFlavorLoading] = useState({});
 
   useEffect(() => {
-    fetch(`${API_BASE}/generators/custom`)
-      .then((res) => res.json())
+    apiGet('/generators/custom')
       .then(setGenerators);
   }, []);
 
   const runGenerator = async (category, system, id) => {
-    const res = await fetch(`${API_BASE}/generators/custom/${category}/${system}/${id}`, {
-      method: "POST",
-    });
+    const res = await apiPost('/generators/custom', { category, system, id });
     const data = await res.json();
     const key = `${category}:${system}:${id}`;
     setResults((prev) => ({ ...prev, [key]: data }));
@@ -32,15 +28,11 @@ export default function SpecializedGenerators() {
 
     setFlavorLoading((prev) => ({ ...prev, [key]: true }));
     try {
-      const res = await fetch(`${API_BASE}/generators/flavor`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          context,
-          data,
-          category,
-          source: `${system}.${id}`
-        }),
+      const res = await apiPost('/generators/flavor', {
+        context,
+        data,
+        category,
+        source: `${system}.${id}`
       });
       const json = await res.json();
       setFlavorResults((prev) => ({ ...prev, [key]: json.narration }));

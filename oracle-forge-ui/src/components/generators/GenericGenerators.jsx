@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
-import config from "../../config";
+import { apiGet, apiPost } from '../../api/apiClient';
 
-const API_BASE = config.SERVER_URL;
 
 export default function GenericGenerators() {
   const [categories, setCategories] = useState([]);
@@ -16,34 +15,30 @@ export default function GenericGenerators() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    fetch(`${API_BASE}/generators/categories`)
+    apiGet('/generators/categories')
       .then((res) => res.json())
       .then(setCategories);
   }, []);
 
   useEffect(() => {
     if (!selectedCategory) return;
-    fetch(`${API_BASE}/generators/${selectedCategory}/files`)
+    apiGet(`/generators/${selectedCategory}/files`)
       .then((res) => res.json())
       .then(setFiles);
   }, [selectedCategory]);
 
   useEffect(() => {
     if (!selectedCategory || !selectedFile) return;
-    fetch(`${API_BASE}/generators/${selectedCategory}/${selectedFile}/tables`)
+    apiGet(`/generators/${selectedCategory}/${selectedFile}/tables`)
       .then((res) => res.json())
       .then(setTables);
   }, [selectedFile]);
 
   const rollTable = () => {
-    fetch(`${API_BASE}/generators/roll`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        category: selectedCategory,
-        file: selectedFile,
-        table_id: selectedTable,
-      }),
+    apiPost('/generators/roll', {
+      category: selectedCategory,
+      file: selectedFile,
+      table_id: selectedTable,
     })
       .then((res) => res.json())
       .then((data) => {
@@ -55,15 +50,11 @@ export default function GenericGenerators() {
   const generateFlavor = async () => {
     setLoading(true);
     try {
-      const res = await fetch(`${API_BASE}/generators/flavor`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          context: flavorText,
-          data: result,
-          category: selectedCategory,
-          source: `${selectedFile.replace(".yaml", "")}.${selectedTable}`,
-        }),
+      const res = await apiPost('/generators/flavor', {
+        context: flavorText,
+        data: result,
+        category: selectedCategory,
+        source: `${selectedFile.replace(".yaml", "")}.${selectedTable}`,
       });
       const data = await res.json();
       setFlavorNarration(data.narration);

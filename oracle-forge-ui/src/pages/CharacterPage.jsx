@@ -1,10 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import config from "../config";
 import Navbar from '../components/core/Navbar';
 import CharacterEditor from '../components/adventure/CharacterEditor';
 
-const API_BASE = config.SERVER_URL;
 
 export default function CharacterPage() {
   const { characterName } = useParams();

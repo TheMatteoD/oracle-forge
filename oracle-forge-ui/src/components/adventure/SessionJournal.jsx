@@ -1,7 +1,5 @@
 import React, { useState, useEffect } from "react";
-import config from "../../config";
-
-const API_BASE = config.SERVER_URL;
+import { apiGet, apiPost } from '../../api/apiClient';
 
 export default function SessionJournal() {
   const [note, setNote] = useState("");
@@ -11,8 +9,7 @@ export default function SessionJournal() {
 
   const fetchLog = () => {
     setLoading(true);
-    fetch(`${API_BASE}/session/log`)
-      .then(res => res.json())
+    apiGet('/session/log')
       .then(response => {
         if (response.success) {
           setLog(Array.isArray(response.data) ? response.data : []);
@@ -36,11 +33,7 @@ export default function SessionJournal() {
   const submitNote = async () => {
     if (!note.trim()) return;
     try {
-      const res = await fetch(`${API_BASE}/session/log`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ content: note, type: "note" }),
-      });
+      const res = await apiPost('/session/log', { content: note, type: "note" });
       const response = await res.json();
       if (response.success) {
         setNote("");

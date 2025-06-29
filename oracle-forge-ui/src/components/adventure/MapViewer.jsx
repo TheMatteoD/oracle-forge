@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import config from "../../config";
+import { apiGet } from '../../api/apiClient';
 
 export default function MapViewer({ adventure }) {
   const [visible, setVisible] = useState(false);
@@ -32,8 +32,7 @@ export default function MapViewer({ adventure }) {
   const fetchCustomMaps = () => {
     if (!adventure) return;
     setCustomLoading(true);
-    fetch(`${config.SERVER_URL}/adventures/${adventure}/custom_maps`)
-      .then(res => res.json())
+    apiGet(`adventures/${adventure}/custom_maps`)
       .then(response => {
         if (response.success) {
           setCustomMaps(response.data || []);

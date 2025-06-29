@@ -1,17 +1,14 @@
 import React, { useEffect, useState } from 'react';
-import config from "../config";
+import { apiGet } from '../api/apiClient';
 import Navbar from '../components/core/Navbar';
 import AdventureSelector from '../components/adventure/AdventureSelector';
 import SessionDashboard from '../components/adventure/SessionDashboard';
-
-const API_BASE = config.SERVER_URL;
 
 export default function AdventurePage() {
   const [activeAdventure, setActiveAdventure] = useState(null);
 
   useEffect(() => {
-    fetch(`${API_BASE}/adventures/active`)
-      .then(res => res.json())
+    apiGet('/adventures/active')
       .then(response => {
         if (response.success && response.data?.active) {
           setActiveAdventure(response.data.active);

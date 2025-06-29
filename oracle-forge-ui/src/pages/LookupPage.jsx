@@ -1,7 +1,7 @@
 // src/pages/LookupPage.jsx
 import React, { useState } from 'react';
 import Navbar from '../components/core/Navbar';
-import config from "../config";
+import { apiPost } from '../api/apiClient';
 
 export default function LookupPage() {
   const API = config.SERVER_URL;

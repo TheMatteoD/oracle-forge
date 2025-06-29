@@ -1,9 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import config from "../../config";
+import { apiGet } from '../../api/apiClient';
 import CharacterCreator from "./CharacterCreator";
-
-const API_BASE = config.SERVER_URL;
 
 export default function PlayerPanel() {
   const [players, setPlayers] = useState([]);
@@ -11,7 +9,7 @@ export default function PlayerPanel() {
 
   const loadPlayers = async () => {
     try {
-      const response = await fetch(`${API_BASE}/session/state`);
+      const response = await apiGet('/session/state');
       const data = await response.json();
       setPlayers(data.players || []);
     } catch (error) {

@@ -209,7 +209,7 @@ class SessionService:
             world_state = self.data_access.get_world_state(adventure_name)
             
             # Get all players
-            players = self.data_access.list_players(adventure_name)
+            players = self.data_access.get_player_states(adventure_name)
             
             # Get active session
             active_session = self.data_access.get_active_session(adventure_name)

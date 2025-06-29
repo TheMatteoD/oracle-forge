@@ -6,17 +6,14 @@ import LookupPage from './pages/LookupPage';
 import GeneratorPage from './pages/GeneratorPage';
 import CombatPage from './pages/CombatPage';
 import CharacterPage from './pages/CharacterPage';
-import config from "./config";
-
-const API_BASE = config.SERVER_URL;
+import { apiGet } from './api/apiClient';
 
 function App() {
   const [activeAdventure, setActiveAdventure] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch(`${API_BASE}/adventures/active`)
-      .then(res => res.json())
+    apiGet('/adventures/active')
       .then(response => {
         if (response.success && response.data?.active) {
           localStorage.setItem("activeAdventure", response.data.active);

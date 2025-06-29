@@ -1,8 +1,7 @@
 import React, { useState } from "react";
-import config from "../config";
+import { apiPost } from '../api/apiClient';
 import Navbar from "../components/core/Navbar";
 
-const API_BASE = config.SERVER_URL;
 
 export default function CombatPage() {
   const [combatState, setCombatState] = useState(null);
@@ -12,11 +11,7 @@ export default function CombatPage() {
 
   const startCombat = async () => {
     try {
-      const res = await fetch(`${API_BASE}/combat/start`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ monsters: ["Acolyte"] })
-      });
+      const res = await apiPost('/combat/start', { monsters: ["Acolyte"] });
       const response = await res.json();
       if (response.success) {
         const data = response.data;
@@ -35,11 +30,7 @@ export default function CombatPage() {
     const defender = combatState.combat_state[defenderName];
 
     try {
-      const res = await fetch(`${API_BASE}/combat/attack`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ attacker, defender })
-      });
+      const res = await apiPost('/combat/attack', { attacker, defender });
       const response = await res.json();
       if (response.success) {
         const data = response.data;

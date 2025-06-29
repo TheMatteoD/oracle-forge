@@ -1,7 +1,4 @@
 import React, { useState, useEffect } from "react";
-import config from "../../config";
-
-const API_BASE = config.SERVER_URL;
 
 export default function CharacterEditor({ character, onCharacterUpdated, onCancel }) {
   const [formData, setFormData] = useState({});

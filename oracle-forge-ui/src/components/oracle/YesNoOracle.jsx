@@ -1,7 +1,5 @@
 import React, { useState } from 'react';
-import config from "../../config";
-
-const API = config.SERVER_URL;
+import { apiPost } from '../../api/apiClient';
 
 function LogModal({ open, onClose, logText, onSave, saving, error }) {
   const [text, setText] = useState(logText);
@@ -39,11 +37,7 @@ export default function YesNoOracle({ chaos }) {
     setOutput('');
     setFlavorText('');
     try {
-      const res = await fetch(`${API}/oracle/yesno`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ question, odds, chaos })
-      });
+      const res = await apiPost('/oracle/yesno', { question, odds, chaos });
       const response = await res.json();
       if (response.success) {
         const data = response.data;
@@ -69,11 +63,7 @@ export default function YesNoOracle({ chaos }) {
     if (!flavorData) return;
     setLoading(true);
     try {
-      const res = await fetch(`${API}/oracle/yesno/flavor`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(flavorData)
-      });
+      const res = await apiPost('/oracle/yesno/flavor', flavorData);
       const response = await res.json();
       if (response.success) {
         const data = response.data;
@@ -99,11 +89,7 @@ export default function YesNoOracle({ chaos }) {
     setLogSaving(true);
     setLogError(null);
     try {
-      const res = await fetch(`${API}/session/log`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ content: text, type: 'oracle' })
-      });
+      const res = await apiPost('/session/log', { content: text, type: 'oracle' });
       const response = await res.json();
       if (response.success) {
         setShowLogModal(false);

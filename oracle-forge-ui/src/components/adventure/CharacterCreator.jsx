@@ -1,7 +1,5 @@
 import React, { useState } from "react";
-import config from "../../config";
-
-const API_BASE = config.SERVER_URL;
+import { apiPost } from '../../api/apiClient';
 
 export default function CharacterCreator({ onCharacterCreated }) {
   const [characterName, setCharacterName] = useState("");
@@ -20,13 +18,7 @@ export default function CharacterCreator({ onCharacterCreated }) {
     setError("");
 
     try {
-      const response = await fetch(`${API_BASE}/session/character`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ name: characterName.trim() }),
-      });
+      const response = await apiPost('/session/character', { name: characterName.trim() });
 
       if (!response.ok) {
         const errorData = await response.json();

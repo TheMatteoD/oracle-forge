@@ -1,9 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import styles from './Core.module.css';
-import config from "../../config";
-
-const API_BASE = config.SERVER_URL;
 
 export default function Navbar({ activeAdventure: propAdventure }) {
   const [activeAdventure, setActiveAdventure] = useState(null);
