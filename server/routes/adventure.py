@@ -59,11 +59,9 @@ def upload_map(adv):
     # HTTP-specific validation
     if 'file' not in request.files:
         return APIResponse.bad_request("No file uploaded")
-    
     file = request.files['file']
     if not file.filename.endswith(".map"):
         return APIResponse.bad_request("Invalid file type")
-    
     # Read file data
     file_data = file.read()
     result = adventure_service.upload_map_file(adv, file_data, file.filename)
@@ -86,11 +84,9 @@ def upload_custom_map(adv):
     # HTTP-specific validation
     if 'file' not in request.files:
         return APIResponse.bad_request("No file uploaded")
-    
     file = request.files['file']
     if not allowed_image(file.filename):
         return APIResponse.bad_request("Invalid file type")
-    
     # Read file data
     file_data = file.read()
     result = adventure_service.upload_custom_map_image(adv, file_data, file.filename)
@@ -108,7 +104,6 @@ def serve_custom_map(adv, filename):
     # HTTP-specific validation
     if not allowed_image(filename):
         return APIResponse.bad_request("Invalid file type")
-    
     map_path = adventure_service.get_custom_map_image_path(adv, filename)
     if map_path and os.path.exists(map_path):
         return send_from_directory(os.path.dirname(map_path), filename)
@@ -131,7 +126,6 @@ def get_world_state(adv):
 def update_world_state(adv):
     """Update world state for an adventure"""
     data = g.request_data
-    
     result = adventure_service.update_world_state(adv, data)
     return handle_service_response(result)
 
@@ -159,7 +153,6 @@ def get_entity(adv, entity_type, entity_name):
 def create_or_update_entity(adv, entity_type, entity_name):
     """Create or update an entity"""
     data = g.request_data
-    
     result = adventure_service.create_or_update_world_entity(adv, entity_type, entity_name, data)
     return handle_service_response(result)
 

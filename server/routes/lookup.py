@@ -16,7 +16,6 @@ logger = logging.getLogger(__name__)
 def lookup_monster():
     """Lookup monsters endpoint"""
     data = g.request_data
-    
     # Extract parameters
     query = data.get("query", "").strip()
     system = data.get("system", "").strip()
@@ -26,7 +25,6 @@ def lookup_monster():
     theme = data.get("theme", "").strip()
     context = data.get("context", "").strip()
     narrate = data.get("narrate", False)
-    
     # Call service
     result = lookup_service.lookup_monsters(
         query=query,
@@ -46,14 +44,12 @@ def lookup_monster():
 def lookup_random_monster():
     """Lookup random monsters endpoint"""
     data = g.request_data or {}
-    
     count = data.get("count", 1)
     system = data.get("system", "").strip()
     environment = data.get("environment", "").strip()
     theme = data.get("theme", "").strip()
     context = data.get("context", "").strip()
     narrate = data.get("narrate", False)
-    
     # Call service
     result = lookup_service.lookup_monsters(
         query="",
@@ -73,7 +69,6 @@ def lookup_random_monster():
 def lookup_item():
     """Lookup items endpoint"""
     data = g.request_data
-    
     # Extract parameters
     query = data.get("query", "").strip()
     system = data.get("system", "").strip()
@@ -86,7 +81,6 @@ def lookup_item():
     theme = data.get("theme", "").strip()
     context = data.get("context", "").strip()
     narrate = data.get("narrate", False)
-    
     # Call service
     result = lookup_service.lookup_items(
         query=query,
@@ -109,7 +103,6 @@ def lookup_item():
 def lookup_random_item():
     """Lookup random items endpoint"""
     data = g.request_data or {}
-    
     count = data.get("count", 1)
     system = data.get("system", "").strip()
     category = data.get("category", "").strip()
@@ -118,7 +111,6 @@ def lookup_random_item():
     theme = data.get("theme", "").strip()
     context = data.get("context", "").strip()
     narrate = data.get("narrate", False)
-    
     # Call service
     result = lookup_service.lookup_items(
         query="",
@@ -140,14 +132,12 @@ def lookup_random_item():
 def lookup_spell():
     """Lookup spells endpoint"""
     data = g.request_data
-    
     query = data.get("query", "").strip()
     system = data.get("system", "").strip()
     tag = data.get("tag", "").strip()
     random_count = data.get("random", 0)
     context = data.get("context", "").strip()
     narrate = data.get("narrate", False)
-    
     # Call service
     result = lookup_service.lookup_spells(
         query=query,
@@ -165,12 +155,10 @@ def lookup_spell():
 def lookup_random_spell():
     """Lookup random spells endpoint"""
     data = g.request_data or {}
-    
     count = data.get("count", 1)
     system = data.get("system", "").strip()
     context = data.get("context", "").strip()
     narrate = data.get("narrate", False)
-    
     # Call service
     result = lookup_service.lookup_spells(
         query="",
@@ -186,11 +174,9 @@ def lookup_random_spell():
 def lookup_rule():
     """Lookup rules endpoint"""
     data = g.request_data
-    
     query = data.get("query", "").strip()
     system = data.get("system", "").strip()
     tag = data.get("tag", "").strip()
-    
     # Call service
     result = lookup_service.lookup_rules(query=query, system=system, tag=tag)
     return handle_service_response(result)

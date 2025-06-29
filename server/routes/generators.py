@@ -53,7 +53,6 @@ def run_custom_generator(category, system, generator_id):
     """Execute a custom generator"""
     data = g.request_data or {}
     parameters = data.get('parameters', {})
-    
     result = generator_service.execute_custom_generator(category, system, generator_id, parameters)
     return handle_service_response(result)
 
@@ -63,11 +62,9 @@ def run_custom_generator(category, system, generator_id):
 def roll_table():
     """Roll on a specific table within a generator"""
     data = g.request_data
-    
     category = data.get("category")
     filename = data.get("file")
     table_id = data.get("table_id")
-    
     result = generator_service.roll_table(category, filename, table_id)
     return handle_service_response(result)
 
@@ -80,12 +77,10 @@ def roll_table():
 def generate_flavor():
     """Generate flavored narration for generator results"""
     data = g.request_data or {}
-    
     context = data.get("context", "")
     result_data = data.get("data", {})
     category = data.get("category", "")
     source = data.get("source", "")
-    
     result = generator_service.generate_flavor(context, result_data, category, source)
     return handle_service_response(result, "narration")
 
@@ -106,7 +101,6 @@ def get_generator(category, filename):
 def create_generator(category):
     """Create a new generator in a category"""
     data = g.request_data
-    
     result = generator_service.create_generator(category, data)
     return handle_service_response(result, "generator")
 
@@ -116,7 +110,6 @@ def create_generator(category):
 def update_generator(category, filename):
     """Update a specific generator"""
     data = g.request_data
-    
     result = generator_service.update_generator(category, filename, data)
     return handle_service_response(result, "generator")
 
@@ -133,10 +126,8 @@ def delete_generator(category, filename):
 def search_generators():
     """Search for generators"""
     params = g.query_params
-    
     query = params.get("q", "")
     generator_type = params.get("type")
-    
     results = generator_service.search_generators(query, generator_type)
     return APIResponse.success(results)
 

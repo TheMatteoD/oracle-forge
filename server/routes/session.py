@@ -28,7 +28,6 @@ def get_session_log():
 def append_session_log():
     """Append entry to session log"""
     data = g.request_data
-    
     # Call service
     result = session_service.append_session_log(data)
     return handle_service_response(result)
@@ -38,7 +37,6 @@ def get_character(character_name):
     """Get character by name"""
     if not character_name:
         return APIResponse.bad_request("Character name is required")
-    
     # Call service
     result = session_service.get_character(character_name)
     return handle_service_response(result)
@@ -48,7 +46,6 @@ def get_character(character_name):
 def create_or_update_character(character_name):
     """Create or update character"""
     data = g.request_data
-    
     # Call service
     result = session_service.create_or_update_character(character_name, data)
     return handle_service_response(result)
@@ -58,7 +55,6 @@ def delete_character(character_name):
     """Delete character by name"""
     if not character_name:
         return APIResponse.bad_request("Character name is required")
-    
     # Call service
     result = session_service.delete_character(character_name)
     return handle_service_response(result)
@@ -76,7 +72,6 @@ def list_characters():
 def bulk_update_characters():
     """Bulk update characters"""
     data = g.request_data
-    
     # Call service
     result = session_service.bulk_update_characters(data.get("characters", []))
     return handle_service_response(result)
@@ -107,7 +102,6 @@ def export_session():
 def import_session():
     """Import session data"""
     data = g.request_data
-    
     # Call service
     result = session_service.import_session(data.get("session_data"))
     return handle_service_response(result)
