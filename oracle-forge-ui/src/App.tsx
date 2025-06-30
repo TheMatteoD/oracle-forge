@@ -8,7 +8,7 @@ import LookupPage from './pages/LookupPage';
 import OraclePage from './pages/OraclePage';
 import './App.css';
 
-export default function App() {
+const App: React.FC = () => {
   return (
     <Router>
       <div className="App">
@@ -24,4 +24,6 @@ export default function App() {
       </div>
     </Router>
   );
-}
+};
+
+export default App;
