@@ -1,12 +1,16 @@
 import React, { useState } from "react";
-import { apiPost } from '../../api/apiClient';
+import type { Player } from '@/types/api';
 
-export default function CharacterCreator({ onCharacterCreated }) {
+interface CharacterCreatorProps {
+  onCharacterCreated: (character: Player) => void;
+}
+
+export default function CharacterCreator({ onCharacterCreated }: CharacterCreatorProps) {
   const [characterName, setCharacterName] = useState("");
   const [isCreating, setIsCreating] = useState(false);
   const [error, setError] = useState("");
 
-  const handleCreateCharacter = async (e) => {
+  const handleCreateCharacter = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!characterName.trim()) {
@@ -18,7 +22,13 @@ export default function CharacterCreator({ onCharacterCreated }) {
     setError("");
 
     try {
-      const response = await apiPost('/session/character', { name: characterName.trim() });
+      // Note: This endpoint might need to be added to AdventureAPI
+      // For now, using direct fetch until we add it
+      const response = await fetch('/session/character', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: characterName.trim() })
+      });
 
       if (!response.ok) {
         const errorData = await response.json();
@@ -31,7 +41,7 @@ export default function CharacterCreator({ onCharacterCreated }) {
         onCharacterCreated(result.character);
       }
     } catch (err) {
-      setError(err.message);
+      setError(err instanceof Error ? err.message : "Failed to create character");
     } finally {
       setIsCreating(false);
     }

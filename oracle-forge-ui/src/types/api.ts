@@ -253,4 +253,8 @@ export function isAPIResponse(obj: any): obj is APIResponse {
 
 export function isPaginatedResponse<T>(obj: any): obj is PaginatedResponse<T> {
   return isAPIResponse(obj) && 'pagination' in obj;
+}
+
+export interface ActiveAdventureResponse {
+  active?: string;
 } 

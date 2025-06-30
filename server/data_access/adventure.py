@@ -24,11 +24,12 @@ class AdventureDataAccess(BaseDataAccess):
         return "Adventure"
     
     # Adventure Management
-    def list_adventures(self) -> List[str]:
-        """List all available adventures"""
+    def list_adventures(self) -> List[Dict[str, str]]:
+        """List all available adventures as dicts with id and name"""
         adventures_path = get_adventures_path()
         self.log_operation("list_adventures", f"Scanning {adventures_path}")
-        return self._list_directories(adventures_path)
+        names = self._list_directories(adventures_path)
+        return [{"id": name, "name": name} for name in names]
     
     def create_adventure(self, adventure_name: str) -> Dict[str, Any]:
         """Create a new adventure with default files"""

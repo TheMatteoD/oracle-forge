@@ -35,6 +35,15 @@ def select_adventure(adventure):
     result = adventure_service.select_adventure(adventure)
     return handle_service_response(result)
 
+@adventure.route("/adventures", methods=["POST"])
+def create_adventure():
+    data = request.get_json()
+    adventure_name = data.get("data", {}).get("name")
+    if not adventure_name:
+        return APIResponse.bad_request("Missing adventure name")
+    result = adventure_service.create_adventure(adventure_name)
+    return handle_service_response(result)
+
 @adventure.route("/adventures/active", methods=["GET"])
 def get_active_adventure():
     """Get the currently active adventure"""

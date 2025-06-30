@@ -1,16 +1,14 @@
 import type { 
   APIResponse, 
   PaginatedResponse, 
-  APIError, 
   ListRequest,
   CreateEntityRequest,
   UpdateEntityRequest,
-  EntityType,
   SystemType
 } from '@/types/api';
 
 // Configuration
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
+const API_BASE_URL = (import.meta as any).env?.VITE_API_BASE_URL || 'http://localhost:5000';
 
 // Request configuration
 interface RequestConfig {
@@ -122,7 +120,7 @@ export class AdventureAPI {
     if (params?.per_page) queryParams.append('per_page', params.per_page.toString());
     if (params?.search) queryParams.append('search', params.search);
     
-    const endpoint = `/adventures${queryParams.toString() ? `?${queryParams}` : ''}`;
+    const endpoint = `/adventures/list${queryParams.toString() ? `?${queryParams}` : ''}`;
     return apiClient.get(endpoint);
   }
 

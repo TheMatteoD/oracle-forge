@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { apiClient } from '../api/apiClient';
 import Navbar from '../components/core/Navbar';
 import CharacterEditor from '../components/adventure/CharacterEditor';
 
@@ -15,11 +16,7 @@ export default function CharacterPage() {
   useEffect(() => {
     const loadCharacter = async () => {
       try {
-        const response = await fetch(`${API_BASE}/session/character/${encodeURIComponent(characterName)}`);
-        if (!response.ok) {
-          throw new Error('Character not found');
-        }
-        const result = await response.json();
+        const result = await apiClient.get(`/session/character/${encodeURIComponent(characterName)}`);
         if (result.success) {
           setCharacter(result.data?.character);
         } else {

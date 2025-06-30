@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { apiGet, apiPost } from '../../api/apiClient';
+import { apiClient } from '../../api/apiClient';
 
 
 export default function SpecializedGenerators() {
@@ -10,15 +10,27 @@ export default function SpecializedGenerators() {
   const [flavorLoading, setFlavorLoading] = useState({});
 
   useEffect(() => {
-    apiGet('/generators/custom')
-      .then(setGenerators);
+    apiClient.get('/generators/custom')
+      .then((response) => {
+        if (response.success) {
+          setGenerators(response.data);
+        }
+      })
+      .catch(error => {
+        console.error("Error fetching generators:", error);
+      });
   }, []);
 
   const runGenerator = async (category, system, id) => {
-    const res = await apiPost('/generators/custom', { category, system, id });
-    const data = await res.json();
+    try {
+      const response = await apiClient.post('/generators/custom', { category, system, id });
+      if (response.success) {
     const key = `${category}:${system}:${id}`;
-    setResults((prev) => ({ ...prev, [key]: data }));
+        setResults((prev) => ({ ...prev, [key]: response.data }));
+      }
+    } catch (error) {
+      console.error("Error running generator:", error);
+    }
   };
 
   const generateFlavor = async (category, system, id) => {
@@ -28,14 +40,15 @@ export default function SpecializedGenerators() {
 
     setFlavorLoading((prev) => ({ ...prev, [key]: true }));
     try {
-      const res = await apiPost('/generators/flavor', {
+      const response = await apiClient.post('/generators/flavor', {
         context,
         data,
         category,
         source: `${system}.${id}`
       });
-      const json = await res.json();
-      setFlavorResults((prev) => ({ ...prev, [key]: json.narration }));
+      if (response.success) {
+        setFlavorResults((prev) => ({ ...prev, [key]: response.data.narration }));
+      }
     } catch (error) {
       console.error("Failed to generate flavor:", error);
     } finally {

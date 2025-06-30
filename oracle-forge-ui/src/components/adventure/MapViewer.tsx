@@ -1,52 +1,63 @@
-import React, { useState, useEffect } from "react";
-import { apiGet } from '../../api/apiClient';
+import { useState, useEffect } from "react";
 
-export default function MapViewer({ adventure }) {
+interface MapViewerProps {
+  adventure: string;
+}
+
+type MapMode = 'azgaar' | 'custom';
+
+export default function MapViewer({ adventure }: MapViewerProps) {
   const [visible, setVisible] = useState(false);
-  const [mode, setMode] = useState("custom"); // 'azgaar' or 'custom'
+  const [mode, setMode] = useState<MapMode>("custom");
 
   // Azgaar map state
   const [azgaarAvailable, setAzgaarAvailable] = useState(false);
   const [azgaarChecking, setAzgaarChecking] = useState(true);
-  const [azgaarUploadFile, setAzgaarUploadFile] = useState(null);
-  const [azgaarStatus, setAzgaarStatus] = useState(null);
+  const [azgaarUploadFile, setAzgaarUploadFile] = useState<File | null>(null);
+  const [azgaarStatus, setAzgaarStatus] = useState<string | null>(null);
 
   // Custom map state
-  const [customMaps, setCustomMaps] = useState([]);
+  const [customMaps, setCustomMaps] = useState<string[]>([]);
   const [customIndex, setCustomIndex] = useState(0);
-  const [customUploadFile, setCustomUploadFile] = useState(null);
-  const [customStatus, setCustomStatus] = useState(null);
+  const [customUploadFile, setCustomUploadFile] = useState<File | null>(null);
+  const [customStatus, setCustomStatus] = useState<string | null>(null);
   const [customLoading, setCustomLoading] = useState(false);
 
   // Check Azgaar map availability only when in Azgaar mode and visible
   useEffect(() => {
     if (!adventure || !visible || mode !== "azgaar") return;
+    
     setAzgaarChecking(true);
-    fetch(`${config.SERVER_URL}/adventures/${adventure}/map_file`, { method: "HEAD" })
+    fetch(`/adventures/${adventure}/map_file`, { method: "HEAD" })
       .then(res => setAzgaarAvailable(res.ok))
       .catch(() => setAzgaarAvailable(false))
       .finally(() => setAzgaarChecking(false));
   }, [adventure, azgaarStatus, visible, mode]);
 
   // Fetch custom maps
-  const fetchCustomMaps = () => {
+  const fetchCustomMaps = async () => {
     if (!adventure) return;
+    
     setCustomLoading(true);
-    apiGet(`adventures/${adventure}/custom_maps`)
-      .then(response => {
-        if (response.success) {
-          setCustomMaps(response.data || []);
-          setCustomIndex(0);
-        } else {
-          console.error("Failed to fetch custom maps:", response.error);
-          setCustomMaps([]);
-        }
-      })
-      .catch(error => {
-        console.error("Error fetching custom maps:", error);
+    try {
+      // Note: This endpoint might need to be added to AdventureAPI
+      // For now, using direct fetch until we add it
+      const response = await fetch(`/adventures/${adventure}/custom_maps`);
+      const data = await response.json();
+      
+      if (data.success) {
+        setCustomMaps(data.data || []);
+        setCustomIndex(0);
+      } else {
+        console.error("Failed to fetch custom maps:", data.error);
         setCustomMaps([]);
-      })
-      .finally(() => setCustomLoading(false));
+      }
+    } catch (error) {
+      console.error("Error fetching custom maps:", error);
+      setCustomMaps([]);
+    } finally {
+      setCustomLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -56,15 +67,18 @@ export default function MapViewer({ adventure }) {
   // Azgaar map upload
   const uploadAzgaar = async () => {
     if (!azgaarUploadFile) return;
+    
     const formData = new FormData();
     formData.append("file", azgaarUploadFile);
     setAzgaarStatus(null);
+    
     try {
-      const res = await fetch(`${config.SERVER_URL}/adventures/${adventure}/upload_map`, {
+      const res = await fetch(`/adventures/${adventure}/upload_map`, {
         method: "POST",
         body: formData,
       });
       const response = await res.json();
+      
       if (response.success) {
         setAzgaarStatus("✅ Map uploaded!");
       } else {
@@ -80,15 +94,18 @@ export default function MapViewer({ adventure }) {
   // Custom map upload
   const uploadCustom = async () => {
     if (!customUploadFile) return;
+    
     const formData = new FormData();
     formData.append("file", customUploadFile);
     setCustomStatus(null);
+    
     try {
-      const res = await fetch(`${config.SERVER_URL}/adventures/${adventure}/upload_custom_map`, {
+      const res = await fetch(`/adventures/${adventure}/upload_custom_map`, {
         method: "POST",
         body: formData,
       });
       const response = await res.json();
+      
       if (response.success) {
         setCustomStatus("✅ Image uploaded!");
         fetchCustomMaps();
@@ -114,6 +131,7 @@ export default function MapViewer({ adventure }) {
       >
         {visible ? "Hide Map" : "Show Map"}
       </button>
+      
       {visible && (
         <div>
           <div className="mb-3">
@@ -130,10 +148,11 @@ export default function MapViewer({ adventure }) {
               Custom Maps
             </button>
           </div>
+          
           {mode === "azgaar" && (
             <div>
               <iframe
-                src={`${config.SERVER_URL}/azgaar/index.html`}
+                src="/azgaar/index.html"
                 title="Azgaar Map"
                 width="100%"
                 height="500"
@@ -146,7 +165,7 @@ export default function MapViewer({ adventure }) {
                 ) : azgaarAvailable ? (
                   <>
                     <a
-                      href={`${config.SERVER_URL}/adventures/${adventure}/map_file`}
+                      href={`/adventures/${adventure}/map_file`}
                       download
                       className="bg-blue-700 text-white px-3 py-1 rounded mr-2"
                     >
@@ -164,10 +183,14 @@ export default function MapViewer({ adventure }) {
                   <input
                     type="file"
                     accept=".map"
-                    onChange={e => setAzgaarUploadFile(e.target.files[0])}
+                    onChange={e => setAzgaarUploadFile(e.target.files?.[0] || null)}
                     className="mb-2"
                   />
-                  <button onClick={uploadAzgaar} className="bg-blue-700 text-white px-3 py-1 rounded ml-2">
+                  <button 
+                    onClick={uploadAzgaar} 
+                    disabled={!azgaarUploadFile}
+                    className="bg-blue-700 text-white px-3 py-1 rounded ml-2"
+                  >
                     Upload Azgaar Map
                   </button>
                   {azgaarStatus && <div className="mt-2 text-sm italic">{azgaarStatus}</div>}
@@ -175,19 +198,25 @@ export default function MapViewer({ adventure }) {
               </div>
             </div>
           )}
+          
           {mode === "custom" && (
             <div className="bg-gray-900 p-3 rounded">
               <h4 className="text-white font-semibold mb-2">Custom Map Gallery</h4>
               <input
                 type="file"
                 accept=".png,.jpg,.jpeg"
-                onChange={e => setCustomUploadFile(e.target.files[0])}
+                onChange={e => setCustomUploadFile(e.target.files?.[0] || null)}
                 className="mb-2"
               />
-              <button onClick={uploadCustom} className="bg-blue-700 text-white px-3 py-1 rounded ml-2">
+              <button 
+                onClick={uploadCustom} 
+                disabled={!customUploadFile}
+                className="bg-blue-700 text-white px-3 py-1 rounded ml-2"
+              >
                 Upload Image
               </button>
               {customStatus && <div className="mt-2 text-sm italic">{customStatus}</div>}
+              
               <div className="mt-4">
                 {customLoading ? (
                   <span className="text-gray-400">Loading images...</span>
@@ -196,7 +225,7 @@ export default function MapViewer({ adventure }) {
                 ) : (
                   <div className="flex flex-col items-center">
                     <img
-                      src={`${config.SERVER_URL}/adventures/${adventure}/custom_maps/${customMaps[customIndex]}`}
+                      src={`/adventures/${adventure}/custom_maps/${customMaps[customIndex]}`}
                       alt="Custom Map"
                       style={{ maxWidth: "100%", maxHeight: 400, borderRadius: 8, border: "2px solid #333" }}
                     />

@@ -1,7 +1,14 @@
 import React, { useState, useEffect } from "react";
+import type { Player } from '@/types/api';
 
-export default function CharacterEditor({ character, onCharacterUpdated, onCancel }) {
-  const [formData, setFormData] = useState({});
+interface CharacterEditorProps {
+  character: Player;
+  onCharacterUpdated: (character: Player) => void;
+  onCancel: () => void;
+}
+
+export default function CharacterEditor({ character, onCharacterUpdated, onCancel }: CharacterEditorProps) {
+  const [formData, setFormData] = useState<Player>({} as Player);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
 
@@ -11,11 +18,11 @@ export default function CharacterEditor({ character, onCharacterUpdated, onCance
     }
   }, [character]);
 
-  const handleInputChange = (path, value) => {
+  const handleInputChange = (path: string, value: string | number) => {
     const keys = path.split('.');
     setFormData(prev => {
       const newData = { ...prev };
-      let current = newData;
+      let current: any = newData;
       
       for (let i = 0; i < keys.length - 1; i++) {
         if (!current[keys[i]]) {
@@ -29,11 +36,11 @@ export default function CharacterEditor({ character, onCharacterUpdated, onCance
     });
   };
 
-  const handleArrayChange = (path, index, value) => {
+  const handleArrayChange = (path: string, index: number, value: string) => {
     const keys = path.split('.');
     setFormData(prev => {
       const newData = { ...prev };
-      let current = newData;
+      let current: any = newData;
       
       for (let i = 0; i < keys.length - 1; i++) {
         if (!current[keys[i]]) {
@@ -51,11 +58,11 @@ export default function CharacterEditor({ character, onCharacterUpdated, onCance
     });
   };
 
-  const addArrayItem = (path) => {
+  const addArrayItem = (path: string) => {
     const keys = path.split('.');
     setFormData(prev => {
       const newData = { ...prev };
-      let current = newData;
+      let current: any = newData;
       
       for (let i = 0; i < keys.length - 1; i++) {
         if (!current[keys[i]]) {
@@ -73,11 +80,11 @@ export default function CharacterEditor({ character, onCharacterUpdated, onCance
     });
   };
 
-  const removeArrayItem = (path, index) => {
+  const removeArrayItem = (path: string, index: number) => {
     const keys = path.split('.');
     setFormData(prev => {
       const newData = { ...prev };
-      let current = newData;
+      let current: any = newData;
       
       for (let i = 0; i < keys.length - 1; i++) {
         current = current[keys[i]];
@@ -88,13 +95,15 @@ export default function CharacterEditor({ character, onCharacterUpdated, onCance
     });
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
     setError("");
 
     try {
-      const response = await fetch(`${API_BASE}/session/character/${encodeURIComponent(character.name)}`, {
+      // Note: This endpoint might need to be added to AdventureAPI
+      // For now, using direct fetch until we add it
+      const response = await fetch(`/session/character/${encodeURIComponent(character.name)}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -114,18 +123,18 @@ export default function CharacterEditor({ character, onCharacterUpdated, onCance
         throw new Error(result.error || 'Failed to update character');
       }
     } catch (err) {
-      setError(err.message);
+      setError(err instanceof Error ? err.message : 'Failed to update character');
     } finally {
       setSaving(false);
     }
   };
 
-  const renderInput = (label, path, type = "text", placeholder = "") => (
+  const renderInput = (label: string, path: string, type: string = "text", placeholder: string = "") => (
     <div className="flex justify-between items-center">
       <label className="font-medium">{label}:</label>
       <input
         type={type}
-        value={formData[path] || ""}
+        value={(formData as any)[path] || ""}
         onChange={(e) => handleInputChange(path, e.target.value)}
         placeholder={placeholder}
         className="bg-gray-700 text-white px-2 py-1 rounded text-sm w-24 text-right"
@@ -133,9 +142,9 @@ export default function CharacterEditor({ character, onCharacterUpdated, onCance
     </div>
   );
 
-  const renderNestedInput = (label, path, type = "text", placeholder = "") => {
+  const renderNestedInput = (label: string, path: string, type: string = "text", placeholder: string = "") => {
     const keys = path.split('.');
-    let value = formData;
+    let value: any = formData;
     for (const key of keys) {
       value = value?.[key] || "";
     }
@@ -154,9 +163,9 @@ export default function CharacterEditor({ character, onCharacterUpdated, onCance
     );
   };
 
-  const renderArrayInput = (label, path) => {
+  const renderArrayInput = (label: string, path: string) => {
     const keys = path.split('.');
-    let array = formData;
+    let array: any = formData;
     for (const key of keys) {
       array = array?.[key] || [];
     }
@@ -174,7 +183,7 @@ export default function CharacterEditor({ character, onCharacterUpdated, onCance
           </button>
         </div>
         <div className="space-y-1">
-          {array.map((item, index) => (
+          {array.map((item: string, index: number) => (
             <div key={index} className="flex items-center gap-2">
               <input
                 type="text"
@@ -304,7 +313,7 @@ export default function CharacterEditor({ character, onCharacterUpdated, onCance
           <div className="bg-gray-800 p-4 rounded md:col-span-2">
             <h3 className="text-lg font-semibold mb-3">📝 Notes</h3>
             <textarea
-              value={formData.notes || ""}
+              value={(formData as any).notes || ""}
               onChange={(e) => handleInputChange("notes", e.target.value)}
               className="w-full bg-gray-700 text-white p-3 rounded h-32 resize-none"
               placeholder="Character notes..."

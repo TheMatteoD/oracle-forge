@@ -1,9 +1,14 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { apiClient } from '../../api/apiClient';
 import styles from './Core.module.css';
 
-export default function Navbar({ activeAdventure: propAdventure }) {
-  const [activeAdventure, setActiveAdventure] = useState(null);
+interface NavbarProps {
+  activeAdventure?: string | null;
+}
+
+export default function Navbar({ activeAdventure: propAdventure }: NavbarProps) {
+  const [activeAdventure, setActiveAdventure] = useState<string | null>(null);
 
   useEffect(() => {
     if (propAdventure !== undefined) {
@@ -11,11 +16,11 @@ export default function Navbar({ activeAdventure: propAdventure }) {
       return;
     }
 
-    fetch(`${API_BASE}/adventures/active`)
-      .then(res => res.json())
+    apiClient.get('/adventures/active')
       .then(response => {
+        const data = response.data as { active?: string };
         if (response.success) {
-          setActiveAdventure(response.data?.active || null);
+          setActiveAdventure(data?.active || null);
         } else {
           console.error("Failed to fetch active adventure:", response.error);
           setActiveAdventure(null);
@@ -40,4 +45,4 @@ export default function Navbar({ activeAdventure: propAdventure }) {
       )}
     </nav>
   );
-}
+} 

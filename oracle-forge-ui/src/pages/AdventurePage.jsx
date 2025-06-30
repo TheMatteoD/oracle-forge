@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { apiGet } from '../api/apiClient';
+import { apiClient } from '../api/apiClient';
 import Navbar from '../components/core/Navbar';
 import AdventureSelector from '../components/adventure/AdventureSelector';
 import SessionDashboard from '../components/adventure/SessionDashboard';
@@ -8,10 +8,14 @@ export default function AdventurePage() {
   const [activeAdventure, setActiveAdventure] = useState(null);
 
   useEffect(() => {
-    apiGet('/adventures/active')
+    apiClient.get('/adventures/active')
       .then(response => {
         if (response.success && response.data?.active) {
-          setActiveAdventure(response.data.active);
+          if (typeof response.data.active === 'string') {
+            setActiveAdventure(null);
+          } else {
+            setActiveAdventure(response.data.active);
+          }
         } else {
           setActiveAdventure(null);
         }

@@ -1,10 +1,9 @@
 // src/pages/LookupPage.jsx
 import React, { useState } from 'react';
 import Navbar from '../components/core/Navbar';
-import { apiPost } from '../api/apiClient';
+import { apiClient } from '../api/apiClient';
 
 export default function LookupPage() {
-  const API = config.SERVER_URL;
   const [monsterQuery, setMonsterQuery] = useState({ query: '', system: '', tag: '', random: '', environment: '', theme: '', context: '', narrate: false, log_session: true });
   const [spellQuery, setSpellQuery] = useState({ query: '', system: '', class: '', level: '', tag: '', random: '', theme: '', context: '', narrate: false, log_session: true });
   const [itemQuery, setItemQuery] = useState({ query: '', system: '', category: '', subcategory: '', tag: '', random: '', environment: '', quality: '', theme: '', context: '', narrate: false, log_session: true });
@@ -27,12 +26,7 @@ export default function LookupPage() {
     );
     
     try {
-      const res = await fetch(`${API}${path}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(cleanBody)
-      });
-      const response = await res.json();
+      const response = await apiClient.post(path, cleanBody);
       if (response.success) {
         setter(JSON.stringify(response.data, null, 2));
       } else {
@@ -52,16 +46,11 @@ export default function LookupPage() {
     }
 
     try {
-      const res = await fetch(`${API}/lookup/rewrite`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          narration: rewriteNarration,
-          instruction: rewriteInstruction,
-          log_session: true
-        })
+      const response = await apiClient.post('/lookup/rewrite', {
+        narration: rewriteNarration,
+        instruction: rewriteInstruction,
+        log_session: true
       });
-      const response = await res.json();
       if (response.success) {
         setRewriteOutput(JSON.stringify(response.data, null, 2));
       } else {
@@ -210,12 +199,6 @@ export default function LookupPage() {
     </div>
   );
 }
-
-const linkStyle = {
-  color: '#6b46c1',
-  display: 'inline-block',
-  marginRight: '1em',
-};
 
 const sectionStyle = {
   marginBottom: '2em',

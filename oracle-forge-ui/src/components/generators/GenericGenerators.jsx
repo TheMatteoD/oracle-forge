@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { apiGet, apiPost } from '../../api/apiClient';
+import { apiClient } from '../../api/apiClient';
 
 
 export default function GenericGenerators() {
@@ -15,49 +15,72 @@ export default function GenericGenerators() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    apiGet('/generators/categories')
-      .then((res) => res.json())
-      .then(setCategories);
+    apiClient.get('/generators/categories')
+      .then((response) => {
+        if (response.success) {
+          setCategories(response.data);
+        }
+      })
+      .catch(error => {
+        console.error("Error fetching categories:", error);
+      });
   }, []);
 
   useEffect(() => {
     if (!selectedCategory) return;
-    apiGet(`/generators/${selectedCategory}/files`)
-      .then((res) => res.json())
-      .then(setFiles);
+    apiClient.get(`/generators/${selectedCategory}/files`)
+      .then((response) => {
+        if (response.success) {
+          setFiles(response.data);
+        }
+      })
+      .catch(error => {
+        console.error("Error fetching files:", error);
+      });
   }, [selectedCategory]);
 
   useEffect(() => {
     if (!selectedCategory || !selectedFile) return;
-    apiGet(`/generators/${selectedCategory}/${selectedFile}/tables`)
-      .then((res) => res.json())
-      .then(setTables);
-  }, [selectedFile]);
+    apiClient.get(`/generators/${selectedCategory}/${selectedFile}/tables`)
+      .then((response) => {
+        if (response.success) {
+          setTables(response.data);
+        }
+      })
+      .catch(error => {
+        console.error("Error fetching tables:", error);
+      });
+  }, [selectedCategory, selectedFile]);
 
   const rollTable = () => {
-    apiPost('/generators/roll', {
+    apiClient.post('/generators/roll', {
       category: selectedCategory,
       file: selectedFile,
       table_id: selectedTable,
     })
-      .then((res) => res.json())
-      .then((data) => {
-        setResult({ [selectedTable]: data.result || data.error });
-        setFlavorNarration("");
+      .then((response) => {
+        if (response.success) {
+          setResult({ [selectedTable]: response.data.result || response.data.error });
+          setFlavorNarration("");
+        }
+      })
+      .catch(error => {
+        console.error("Error rolling table:", error);
       });
   };
 
   const generateFlavor = async () => {
     setLoading(true);
     try {
-      const res = await apiPost('/generators/flavor', {
+      const response = await apiClient.post('/generators/flavor', {
         context: flavorText,
         data: result,
         category: selectedCategory,
         source: `${selectedFile.replace(".yaml", "")}.${selectedTable}`,
       });
-      const data = await res.json();
-      setFlavorNarration(data.narration);
+      if (response.success) {
+        setFlavorNarration(response.data.narration);
+      }
     } catch (err) {
       console.error("Flavor generation failed:", err);
     } finally {

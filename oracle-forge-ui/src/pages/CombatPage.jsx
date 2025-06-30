@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { apiPost } from '../api/apiClient';
+import { apiClient } from '../api/apiClient';
 import Navbar from "../components/core/Navbar";
 
 
@@ -11,8 +11,7 @@ export default function CombatPage() {
 
   const startCombat = async () => {
     try {
-      const res = await apiPost('/combat/start', { monsters: ["Acolyte"] });
-      const response = await res.json();
+      const response = await apiClient.post('/combat/start', { monsters: ["Acolyte"] });
       if (response.success) {
         const data = response.data;
         setCombatState(data);
@@ -30,8 +29,7 @@ export default function CombatPage() {
     const defender = combatState.combat_state[defenderName];
 
     try {
-      const res = await apiPost('/combat/attack', { attacker, defender });
-      const response = await res.json();
+      const response = await apiClient.post('/combat/attack', { attacker, defender });
       if (response.success) {
         const data = response.data;
         setCombatLog(log => [...log, `${data.attacker} attacks ${data.defender}: ${data.hit ? `Hits for ${data.damage}` : "Missed"}`]);
