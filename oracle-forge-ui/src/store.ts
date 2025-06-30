@@ -1,12 +1,24 @@
 import { configureStore } from '@reduxjs/toolkit';
 import { useDispatch } from 'react-redux';
-// import adventuresReducer from './features/adventures/adventuresSlice'; // To be created
+import adventuresReducer from './features/adventuresSlice';
+import playersReducer from './features/playersSlice';
+import worldReducer from './features/worldSlice';
+import sessionsReducer from './features/sessionsSlice';
+import oraclesReducer from './features/oraclesSlice';
+import generatorsReducer from './features/generatorsSlice';
+import lookupsReducer from './features/lookupsSlice';
+import combatReducer from './features/combatSlice';
 
-// Placeholder root reducer (add slices here as you create them)
 export const store = configureStore({
   reducer: {
-    // adventures: adventuresReducer,
-    // Add other slices here
+    adventures: adventuresReducer,
+    players: playersReducer,
+    world: worldReducer,
+    sessions: sessionsReducer,
+    oracles: oraclesReducer,
+    generators: generatorsReducer,
+    lookups: lookupsReducer,
+    combat: combatReducer,
   },
   // Add middleware for RTK Query here if needed
 });

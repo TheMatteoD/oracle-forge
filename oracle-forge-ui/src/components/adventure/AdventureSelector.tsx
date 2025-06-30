@@ -1,86 +1,44 @@
 import { useEffect, useState } from "react";
-import { AdventureAPI } from '@/api/apiClient';
+import { useSelector } from "react-redux";
+import { useAppDispatch } from "@/store";
+import { fetchAdventures, fetchAdventure, createAdventureThunk } from "@/features/adventuresThunks";
 import type { Adventure } from '@/types/api';
+import type { RootState } from '@/store';
 
 interface AdventureSelectorProps {
   onSelect: (adventure: Adventure) => void;
 }
 
 export default function AdventureSelector({ onSelect }: AdventureSelectorProps) {
-  const [adventures, setAdventures] = useState<Adventure[]>([]);
+  const dispatch = useAppDispatch();
+  const adventures = useSelector((state: RootState) => state.adventures.adventures);
+  const loading = useSelector((state: RootState) => state.adventures.loading);
+  const error = useSelector((state: RootState) => state.adventures.error);
   const [newAdvName, setNewAdvName] = useState("");
-  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    loadAdventures();
-  }, []);
-
-  const loadAdventures = async () => {
-    try {
-      const response = await AdventureAPI.listAdventures();
-      if (response.success && response.data) {
-        // Extract adventure names from the response
-        const adventureNames = response.data.map((adv: Adventure) => adv.name);
-        setAdventures(response.data);
-      } else {
-        console.error("Failed to fetch adventures:", response.error);
-        setAdventures([]);
-      }
-    } catch (error) {
-      console.error("Error fetching adventures:", error);
-      setAdventures([]);
-    }
-  };
+    dispatch(fetchAdventures());
+  }, [dispatch]);
 
   const selectAdventure = async (adventure: Adventure) => {
-    setLoading(true);
-    try {
-      const response = await AdventureAPI.getAdventure(adventure.name);
-      
-      if (response.success) {
-        onSelect(adventure);
-      } else {
-        console.error("Failed to select adventure:", response.error);
-      }
-    } catch (error) {
-      console.error("Error selecting adventure:", error);
-    } finally {
-      setLoading(false);
+    // Dispatch thunk to fetch and set active adventure
+    const resultAction = await dispatch(fetchAdventure(adventure.name));
+    if (fetchAdventure.fulfilled.match(resultAction)) {
+      onSelect(resultAction.payload);
+    } else {
+      // Optionally handle error
+      // (error is already in Redux state)
     }
   };
 
   const createAdventure = async () => {
     if (!newAdvName.trim()) return;
-    
-    setLoading(true);
-    try {
-      const response = await AdventureAPI.createAdventure({
-        data: {
-          name: newAdvName,
-          system: 'dnd5e',
-          world_state: {
-            npcs: [],
-            factions: [],
-            locations: [],
-            story_lines: []
-          },
-          players: []
-        }
-      });
-      
-      if (response.success) {
-        setAdventures([...adventures, response.data]);
-        setNewAdvName("");
-        // Optionally select the new adventure
-        onSelect(response.data);
-      } else {
-        console.error("Failed to create adventure:", response.error);
-      }
-    } catch (error) {
-      console.error("Error creating adventure:", error);
-    } finally {
-      setLoading(false);
+    const resultAction = await dispatch(createAdventureThunk({ name: newAdvName.trim() }));
+    if (createAdventureThunk.fulfilled.match(resultAction)) {
+      setNewAdvName("");
+      onSelect(resultAction.payload);
     }
+    // Error is handled in Redux state
   };
 
   return (
@@ -105,7 +63,9 @@ export default function AdventureSelector({ onSelect }: AdventureSelectorProps) 
       </div>
 
       <h2 className="mt-6">📂 Select Adventure</h2>
-      {adventures.length === 0 ? (
+      {error && <p className="text-red-400">{error}</p>}
+      {loading && <p>Loading adventures...</p>}
+      {adventures.length === 0 && !loading ? (
         <p>No adventures found. Create one above!</p>
       ) : (
         <ul style={{ listStyle: 'none', paddingLeft: 0 }}>
