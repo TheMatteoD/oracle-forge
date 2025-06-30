@@ -29,11 +29,6 @@ def list_adventures():
     adventures = adventure_service.list_adventures()
     return APIResponse.success(adventures)
 
-@adventure.route("/adventures/select/<adventure>", methods=["POST"])
-def select_adventure(adventure):
-    """Select an adventure as active"""
-    result = adventure_service.select_adventure(adventure)
-    return handle_service_response(result)
 
 @adventure.route("/adventures", methods=["POST"])
 def create_adventure():
@@ -43,6 +38,34 @@ def create_adventure():
         return APIResponse.bad_request("Missing adventure name")
     result = adventure_service.create_adventure(adventure_name)
     return handle_service_response(result)
+
+@adventure.route("/adventures/<adventure>", methods=["GET"])
+def get_adventure(adventure):
+    # Check if the adventure exists
+    adventures = adventure_service.list_adventures()
+    adventure_names = [a.get("name") for a in adventures if isinstance(a, dict) and "name" in a]
+    if adventure not in adventure_names or adventure is None:
+        return APIResponse.not_found("Adventure does not exist")
+    
+    # Set as active (guaranteed to be a string)
+    adventure_service._set_active_adventure(str(adventure))
+    
+    # Aggregate full adventure data
+    try:
+        world_state = adventure_service.get_world_state(adventure)
+        player_states = adventure_service.data_access.get_player_states(adventure)
+        active_session = adventure_service.data_access.get_active_session(adventure)
+        # Compose the full adventure object
+        adventure_obj = {
+            "id": adventure,
+            "name": adventure,
+            "world_state": world_state,
+            "player_states": player_states,
+            "active_session": active_session
+        }
+        return APIResponse.success(adventure_obj)
+    except Exception as e:
+        return APIResponse.internal_error(f"Failed to load adventure data: {e}")
 
 @adventure.route("/adventures/active", methods=["GET"])
 def get_active_adventure():

@@ -35,17 +35,12 @@ export default function AdventureSelector({ onSelect }: AdventureSelectorProps) 
   const selectAdventure = async (adventure: Adventure) => {
     setLoading(true);
     try {
-      const response = await fetch(`/adventures/select/${encodeURIComponent(adventure.name)}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({})
-      });
+      const response = await AdventureAPI.getAdventure(adventure.name);
       
-      const result = await response.json();
-      if (result.success) {
+      if (response.success) {
         onSelect(adventure);
       } else {
-        console.error("Failed to select adventure:", result.error);
+        console.error("Failed to select adventure:", response.error);
       }
     } catch (error) {
       console.error("Error selecting adventure:", error);
