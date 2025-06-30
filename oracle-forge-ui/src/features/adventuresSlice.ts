@@ -1,6 +1,6 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import type { Adventure } from '../types/api';
-import { fetchAdventures, fetchAdventure, createAdventureThunk } from './adventuresThunks';
+// Async logic will be handled by RTK Query going forward
 
 interface AdventuresState {
   adventures: Adventure[];
@@ -33,45 +33,7 @@ const adventuresSlice = createSlice({
       state.error = action.payload;
     },
   },
-  extraReducers: (builder) => {
-    builder
-      .addCase(fetchAdventures.pending, (state) => {
-        state.loading = true;
-        state.error = null;
-      })
-      .addCase(fetchAdventures.fulfilled, (state, action) => {
-        state.loading = false;
-        state.adventures = action.payload;
-      })
-      .addCase(fetchAdventures.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload as string || 'Failed to fetch adventures';
-      })
-      .addCase(fetchAdventure.pending, (state) => {
-        state.loading = true;
-        state.error = null;
-      })
-      .addCase(fetchAdventure.fulfilled, (state, action) => {
-        state.loading = false;
-        state.activeAdventure = action.payload;
-      })
-      .addCase(fetchAdventure.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload as string || 'Failed to fetch adventure';
-      })
-      .addCase(createAdventureThunk.pending, (state) => {
-        state.loading = true;
-        state.error = null;
-      })
-      .addCase(createAdventureThunk.fulfilled, (state, action) => {
-        state.loading = false;
-        state.activeAdventure = action.payload;
-      })
-      .addCase(createAdventureThunk.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload as string || 'Failed to create adventure';
-      });
-  },
+  // No extraReducers needed; async handled by RTK Query
 });
 
 export const {
