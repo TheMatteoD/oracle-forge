@@ -1,5 +1,6 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 import config from '../config.js';
+import { createResponseTransformer } from './baseApi';
 
 export type LookupEntityType = 'items' | 'monsters' | 'spells' | 'rules';
 
@@ -14,9 +15,11 @@ export const lookupApi = createApi({
   endpoints: (builder) => ({
     lookupList: builder.query<LookupEntity[], { entityType: LookupEntityType; system: string }>({
       query: ({ entityType, system }) => `/lookup/${entityType}/${system}`,
+      transformResponse: createResponseTransformer<LookupEntity[]>(),
     }),
     getEntity: builder.query<LookupEntity, { entityType: LookupEntityType; system: string; name: string }>({
       query: ({ entityType, system, name }) => `/lookup/${entityType}/${system}/${name}`,
+      transformResponse: createResponseTransformer<LookupEntity>(),
     }),
   }),
 });

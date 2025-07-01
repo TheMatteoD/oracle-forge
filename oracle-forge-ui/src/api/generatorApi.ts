@@ -1,5 +1,6 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 import config from '../config.js';
+import { createResponseTransformer } from './baseApi';
 
 export interface Generator {
   name: string;
@@ -13,9 +14,11 @@ export const generatorApi = createApi({
     listGenerators: builder.query<Generator[], { system: string; category?: string }>({
       query: ({ system, category }) =>
         `/generators/${system}${category ? `?category=${category}` : ''}`,
+      transformResponse: createResponseTransformer<Generator[]>(),
     }),
     getGenerator: builder.query<Generator, { system: string; name: string }>({
       query: ({ system, name }) => `/generators/${system}/${name}`,
+      transformResponse: createResponseTransformer<Generator>(),
     }),
     runGenerator: builder.mutation<any, { system: string; name: string; parameters: Record<string, any> }>({
       query: ({ system, name, parameters }) => ({
@@ -23,6 +26,7 @@ export const generatorApi = createApi({
         method: 'POST',
         body: parameters,
       }),
+      transformResponse: createResponseTransformer<any>(),
     }),
   }),
 });

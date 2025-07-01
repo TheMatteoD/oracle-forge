@@ -1,44 +1,49 @@
-import { useEffect, useState } from "react";
-import { useSelector } from "react-redux";
-import { useAppDispatch } from "@/store";
-import { fetchAdventures, fetchAdventure, createAdventureThunk } from "@/features/adventuresThunks";
-import type { Adventure } from '@/types/api';
-import type { RootState } from '@/store';
+import { useState } from "react";
+import {
+  useListAdventuresQuery,
+  useCreateAdventureMutation,
+  useLazyGetAdventureQuery,
+} from "@/api/adventureApi";
+import type { Adventure } from '@/api/adventureApi';
 
 interface AdventureSelectorProps {
   onSelect: (adventure: Adventure) => void;
 }
 
 export default function AdventureSelector({ onSelect }: AdventureSelectorProps) {
-  const dispatch = useAppDispatch();
-  const adventures = useSelector((state: RootState) => state.adventures.adventures);
-  const loading = useSelector((state: RootState) => state.adventures.loading);
-  const error = useSelector((state: RootState) => state.adventures.error);
+  const { data: adventures = [], isLoading, error, refetch } = useListAdventuresQuery();
+  const [createAdventure, { isLoading: isCreating }] = useCreateAdventureMutation();
+  const [getAdventure, { isLoading: isSelecting }] = useLazyGetAdventureQuery();
   const [newAdvName, setNewAdvName] = useState("");
+  const [selectingId, setSelectingId] = useState<string | null>(null);
+  const [selectError, setSelectError] = useState<string | null>(null);
 
-  useEffect(() => {
-    dispatch(fetchAdventures());
-  }, [dispatch]);
+  // Defensive check to ensure adventures is always an array
+  const safeAdventures = Array.isArray(adventures) ? adventures : [];
 
-  const selectAdventure = async (adventure: Adventure) => {
-    // Dispatch thunk to fetch and set active adventure
-    const resultAction = await dispatch(fetchAdventure(adventure.name));
-    if (fetchAdventure.fulfilled.match(resultAction)) {
-      onSelect(resultAction.payload);
-    } else {
-      // Optionally handle error
-      // (error is already in Redux state)
+  const handleSelectAdventure = async (adventure: Adventure) => {
+    setSelectingId(adventure.id || adventure.name);
+    setSelectError(null);
+    try {
+      const result = await getAdventure(adventure.name).unwrap();
+      onSelect(result);
+    } catch (e: any) {
+      setSelectError(e.data?.error || e.message || 'Failed to activate adventure');
+    } finally {
+      setSelectingId(null);
     }
   };
 
-  const createAdventure = async () => {
+  const handleCreateAdventure = async () => {
     if (!newAdvName.trim()) return;
-    const resultAction = await dispatch(createAdventureThunk({ name: newAdvName.trim() }));
-    if (createAdventureThunk.fulfilled.match(resultAction)) {
+    try {
+      const created = await createAdventure({ name: newAdvName.trim() }).unwrap();
       setNewAdvName("");
-      onSelect(resultAction.payload);
+      await handleSelectAdventure(created);
+      refetch();
+    } catch (e: any) {
+      setSelectError(e.data?.error || e.message || 'Failed to create adventure');
     }
-    // Error is handled in Redux state
   };
 
   return (
@@ -51,32 +56,33 @@ export default function AdventureSelector({ onSelect }: AdventureSelectorProps) 
           onChange={(e) => setNewAdvName(e.target.value)}
           placeholder="Enter adventure name"
           style={{ marginRight: '1em', padding: '0.5em' }}
-          onKeyPress={(e) => e.key === 'Enter' && createAdventure()}
+          onKeyPress={(e) => e.key === 'Enter' && handleCreateAdventure()}
         />
-        <button 
-          onClick={createAdventure} 
-          disabled={loading || !newAdvName.trim()}
+        <button
+          onClick={handleCreateAdventure}
+          disabled={isCreating || !newAdvName.trim()}
           className="bg-purple-700 text-white px-4 py-2 rounded"
         >
-          {loading ? 'Creating...' : 'Create Adventure'}
+          {isCreating ? 'Creating...' : 'Create Adventure'}
         </button>
       </div>
 
       <h2 className="mt-6">📂 Select Adventure</h2>
-      {error && <p className="text-red-400">{error}</p>}
-      {loading && <p>Loading adventures...</p>}
-      {adventures.length === 0 && !loading ? (
+      {error && <p className="text-red-400">{String(error)}</p>}
+      {selectError && <p className="text-red-400">{selectError}</p>}
+      {isLoading && <p>Loading adventures...</p>}
+      {safeAdventures.length === 0 && !isLoading ? (
         <p>No adventures found. Create one above!</p>
       ) : (
         <ul style={{ listStyle: 'none', paddingLeft: 0 }}>
-          {adventures.map((adv) => (
+          {safeAdventures.map((adv) => (
             <li key={adv.id || adv.name} style={{ marginBottom: '0.5em' }}>
               <button
-                onClick={() => selectAdventure(adv)}
-                disabled={loading}
+                onClick={() => handleSelectAdventure(adv)}
+                disabled={isLoading || isSelecting || selectingId === (adv.id || adv.name)}
                 className="bg-gray-700 text-white px-4 py-2 rounded"
               >
-                {adv.name}
+                {selectingId === (adv.id || adv.name) ? 'Selecting...' : adv.name}
               </button>
             </li>
           ))}
