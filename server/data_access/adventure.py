@@ -64,10 +64,18 @@ class AdventureDataAccess(BaseDataAccess):
             get_adventure_file_path(adventure_name, "player_states.yaml")
         )
         
+        active_session_data = {"adventure": adventure_name, "session_id": "session_01"}
         active_session = self._create_from_template(
             "adventures/active_session.yaml",
-            {"adventure": adventure_name, "session_id": "session_01"},
+            active_session_data,
             get_adventure_file_path(adventure_name, "active_session.yaml")
+        )
+        # Also create the first session file in sessions/
+        session_file_path = os.path.join(adventure_path, "sessions", "session_01.yaml")
+        self._create_from_template(
+            "adventures/sessions/session_template.yaml",
+            active_session_data,
+            session_file_path
         )
         
         return {

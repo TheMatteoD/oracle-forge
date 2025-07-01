@@ -37,9 +37,8 @@ export default function AdventureSelector({ onSelect }: AdventureSelectorProps) 
   const handleCreateAdventure = async () => {
     if (!newAdvName.trim()) return;
     try {
-      const created = await createAdventure({ name: newAdvName.trim() }).unwrap();
+      await createAdventure({ name: newAdvName.trim() }).unwrap();
       setNewAdvName("");
-      await handleSelectAdventure(created);
       refetch();
     } catch (e: any) {
       setSelectError(e.data?.error || e.message || 'Failed to create adventure');

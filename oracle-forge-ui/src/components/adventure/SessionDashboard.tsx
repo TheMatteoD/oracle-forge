@@ -4,7 +4,7 @@ import WorldSummary from "./WorldSummary";
 import SessionJournal from "./SessionJournal";
 import MapViewer from "./MapViewer";
 import { useEndSessionMutation } from "@/api/sessionApi";
-import { useGetActiveAdventureQuery, useGetAdventureQuery } from "@/api/adventureApi";
+import { useGetActiveAdventureQuery, useGetAdventureQuery, useClearActiveAdventureMutation } from "@/api/adventureApi";
 
 export default function SessionDashboard() {
   const [ending, setEnding] = useState(false);
@@ -12,6 +12,7 @@ export default function SessionDashboard() {
   const [error, setError] = useState<string | null>(null);
   const [mdLink, setMdLink] = useState<string | null>(null);
   const [endSession] = useEndSessionMutation();
+  const [clearActiveAdventure] = useClearActiveAdventureMutation();
 
   // Get the active adventure name
   const { data: activeData, isLoading: loadingActive, error: errorActive } = useGetActiveAdventureQuery();
@@ -30,9 +31,13 @@ export default function SessionDashboard() {
     return <div>No active adventure found.</div>;
   }
 
+  // Determine if session can be ended (must have at least one log entry)
+  const sessionLog = adventure.active_session?.log || [];
+  const canEndSession = sessionLog.length > 0;
+
   const leaveAdventure = async () => {
     try {
-      await endSession().unwrap();
+      await clearActiveAdventure().unwrap();
       localStorage.removeItem("activeAdventure");
       window.location.reload(); // Forces full state reset (simplest path)
     } catch (error) {
@@ -80,11 +85,16 @@ export default function SessionDashboard() {
         <button
           onClick={handleEndSession}
           className="px-4 py-2 bg-purple-700 text-white rounded"
-          disabled={ending}
+          disabled={ending || !canEndSession}
         >
           {ending ? "Ending Session..." : "End Session"}
         </button>
       </div>
+      {!canEndSession && (
+        <div className="text-yellow-400 mb-2">
+          Add at least one log entry before ending the session.
+        </div>
+      )}
       {error && <div className="text-red-400 mb-2">{error}</div>}
       {summary && (
         <div className="bg-gray-900 p-4 rounded mt-4">

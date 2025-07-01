@@ -32,6 +32,7 @@ class SessionService:
         """Get the currently active adventure"""
         try:
             if not os.path.exists(self.active_adventure_path):
+                print("active adventure file didn't exist")
                 return None
             
             with open(self.active_adventure_path, 'r') as f:
@@ -39,7 +40,11 @@ class SessionService:
             
             # Verify the adventure still exists
             adventures = self.data_access.list_adventures()
-            if adventure not in adventures:
+            adventure_names = [a['name'] for a in adventures]
+            if adventure not in adventure_names:
+                print("current adventure not in list of adventures. Clearing active")
+                print("Current active: ", adventure)
+                print("List of adventures: ", adventure_names)
                 self._clear_active_adventure()
                 return None
             

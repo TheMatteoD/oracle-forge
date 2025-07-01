@@ -15,6 +15,7 @@ import { lookupApi } from './api/lookupApi';
 import { oracleApi } from './api/oracleApi';
 import { generatorApi } from './api/generatorApi';
 import { combatApi } from './api/combatApi';
+import { sessionApi } from './api/sessionApi';
 
 export const store = configureStore({
   reducer: {
@@ -32,6 +33,7 @@ export const store = configureStore({
     [oracleApi.reducerPath]: oracleApi.reducer,
     [generatorApi.reducerPath]: generatorApi.reducer,
     [combatApi.reducerPath]: combatApi.reducer,
+    [sessionApi.reducerPath]: sessionApi.reducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware().concat(
@@ -39,7 +41,8 @@ export const store = configureStore({
       lookupApi.middleware,
       oracleApi.middleware,
       generatorApi.middleware,
-      combatApi.middleware
+      combatApi.middleware,
+      sessionApi.middleware
     ),
 });
 

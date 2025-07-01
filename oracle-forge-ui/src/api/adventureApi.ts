@@ -5,6 +5,12 @@ import { BackendResponse, createResponseTransformer } from './baseApi';
 export interface Adventure {
   id: string;
   name: string;
+  world_state?: any;
+  player_states?: any;
+  active_session?: {
+    log?: any[];
+    // add other fields as needed
+  };
 }
 
 export interface ActiveAdventureResponse {
@@ -123,6 +129,13 @@ export const adventureApi = createApi({
       }),
       transformResponse: createResponseTransformer<any>(),
     }),
+    clearActiveAdventure: builder.mutation<any, void>({
+      query: () => ({
+        url: '/adventures/clear',
+        method: 'POST',
+      }),
+      transformResponse: createResponseTransformer<any>(),
+    }),
   }),
 });
 
@@ -143,4 +156,5 @@ export const {
   useCreatePlayerMutation,
   useGetPlayerQuery,
   useUpdatePlayerMutation,
+  useClearActiveAdventureMutation,
 } = adventureApi; 
