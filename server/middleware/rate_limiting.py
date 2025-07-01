@@ -103,8 +103,10 @@ def rate_limit_middleware():
     """Rate limiting middleware function"""
     endpoint = request.endpoint or "unknown"
     
-    # Skip rate limiting for certain endpoints
+    # Skip rate limiting for certain endpoints and static/Azgaar files
     if endpoint in ["health", "config_status", "static"]:
+        return
+    if request.path.startswith("/azgaar/") or request.path.startswith("/static/"):
         return
     
     # Check rate limit

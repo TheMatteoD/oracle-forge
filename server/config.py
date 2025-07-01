@@ -208,15 +208,8 @@ class ConfigManager:
             logger.error(error_msg)
             raise ValueError(error_msg)
     
-    @property
-    def config(self) -> AppConfig:
-        """Get the current configuration"""
-        if self._config is None:
-            self._load_config()
-        return self._config
-    
     def get_database_path(self, path_type: str) -> str:
-        """Get a database path by type"""
+        """Get a database path by type, always absolute from project root"""
         path_map = {
             'vault': self.config.database.vault_path,
             'vault_templates': self.config.database.vault_templates_path,
@@ -227,7 +220,20 @@ class ConfigManager:
             'rules': self.config.database.rules_path,
             'index': self.config.database.index_path,
         }
-        return path_map.get(path_type, self.config.database.vault_path)
+        rel_path = path_map.get(path_type, self.config.database.vault_path)
+        # Project root is one level up from server/
+        base = Path(__file__).parent.parent.resolve()
+        abs_path = (base / rel_path).resolve()
+        return str(abs_path)
+    
+    @property
+    def config(self) -> AppConfig:
+        """Get the current configuration"""
+        if self._config is None:
+            self._load_config()
+        # Always return AppConfig, never None
+        assert self._config is not None, "Config failed to load."
+        return self._config
     
     def reload(self) -> None:
         """Reload configuration from disk"""

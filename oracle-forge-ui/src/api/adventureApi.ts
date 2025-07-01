@@ -58,6 +58,45 @@ export const adventureApi = createApi({
       }),
       transformResponse: createResponseTransformer<void>(),
     }),
+    listCustomMaps: builder.query<string[], string>({
+      query: (adventure) => `/adventures/${adventure}/custom_maps`,
+      transformResponse: createResponseTransformer<string[]>(),
+    }),
+    uploadCustomMap: builder.mutation<any, { adventure: string; file: File }>({
+      query: ({ adventure, file }) => {
+        const formData = new FormData();
+        formData.append('file', file);
+        return {
+          url: `/adventures/${adventure}/upload_custom_map`,
+          method: 'POST',
+          body: formData,
+        };
+      },
+    }),
+    uploadAzgaarMap: builder.mutation<any, { adventure: string; file: File }>({
+      query: ({ adventure, file }) => {
+        const formData = new FormData();
+        formData.append('file', file);
+        return {
+          url: `/adventures/${adventure}/upload_map`,
+          method: 'POST',
+          body: formData,
+        };
+      },
+    }),
+    getAzgaarMapFile: builder.query<Blob, string>({
+      query: (adventure) => ({
+        url: `/adventures/${adventure}/map_file`,
+        responseHandler: (response) => response.blob(),
+      }),
+    }),
+    checkAzgaarMapExists: builder.query<boolean, string>({
+      query: (adventure) => ({
+        url: `/adventures/${adventure}/map_file`,
+        method: 'HEAD',
+      }),
+      transformResponse: (_: unknown, meta) => meta?.response?.status === 200,
+    }),
   }),
 });
 
@@ -69,4 +108,9 @@ export const {
   useCreateAdventureMutation,
   useUpdateAdventureMutation,
   useDeleteAdventureMutation,
+  useListCustomMapsQuery,
+  useUploadCustomMapMutation,
+  useUploadAzgaarMapMutation,
+  useGetAzgaarMapFileQuery,
+  useCheckAzgaarMapExistsQuery,
 } = adventureApi; 

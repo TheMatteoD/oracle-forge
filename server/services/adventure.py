@@ -15,6 +15,7 @@ from pathlib import Path
 
 from ..data_access import AdventureDataAccess, DataAccessError
 from ..config import get_config
+from ..utils.paths import get_adventure_path
 
 logger = logging.getLogger(__name__)
 
@@ -63,8 +64,8 @@ class AdventureService:
         try:
             # Verify adventure exists
             adventures = self.data_access.list_adventures()
-            if adventure_name not in adventures:
-                # Create it if it doesn't exist
+            adventure_names = [a["name"] if isinstance(a, dict) and "name" in a else a for a in adventures]
+            if adventure_name not in adventure_names:
                 return self.create_adventure(adventure_name)
             
             # Set as active
@@ -94,7 +95,8 @@ class AdventureService:
             
             # Verify the adventure still exists
             adventures = self.data_access.list_adventures()
-            if adventure not in adventures:
+            adventure_names = [a["name"] if isinstance(a, dict) and "name" in a else a for a in adventures]
+            if adventure not in adventure_names:
                 self.clear_active_adventure()
                 return None
             
@@ -274,7 +276,7 @@ class AdventureService:
                 }
             
             # Save the file
-            map_dir = os.path.join(self.data_access._get_adventure_path(adventure_name), "world")
+            map_dir = os.path.join(get_adventure_path(adventure_name), "world")
             os.makedirs(map_dir, exist_ok=True)
             
             map_path = os.path.join(map_dir, "map.map")
@@ -296,7 +298,7 @@ class AdventureService:
     def get_map_file_path(self, adventure_name: str) -> Optional[str]:
         """Get the path to the map file for an adventure"""
         try:
-            map_path = os.path.join(self.data_access._get_adventure_path(adventure_name), "world", "map.map")
+            map_path = os.path.join(get_adventure_path(adventure_name), "world", "map.map")
             if os.path.exists(map_path):
                 return map_path
             return None
@@ -319,7 +321,7 @@ class AdventureService:
                 }
             
             # Save the file
-            map_dir = os.path.join(self.data_access._get_adventure_path(adventure_name), "world", "custom_maps")
+            map_dir = os.path.join(get_adventure_path(adventure_name), "world", "custom_maps")
             os.makedirs(map_dir, exist_ok=True)
             
             file_path = os.path.join(map_dir, filename)
@@ -342,7 +344,7 @@ class AdventureService:
     def list_custom_map_images(self, adventure_name: str) -> List[str]:
         """List all custom map images for an adventure"""
         try:
-            map_dir = os.path.join(self.data_access._get_adventure_path(adventure_name), "world", "custom_maps")
+            map_dir = os.path.join(get_adventure_path(adventure_name), "world", "custom_maps")
             if not os.path.exists(map_dir):
                 return []
             
@@ -366,7 +368,7 @@ class AdventureService:
             if file_ext not in allowed_extensions:
                 return None
             
-            map_dir = os.path.join(self.data_access._get_adventure_path(adventure_name), "world", "custom_maps")
+            map_dir = os.path.join(get_adventure_path(adventure_name), "world", "custom_maps")
             file_path = os.path.join(map_dir, filename)
             
             if os.path.exists(file_path):

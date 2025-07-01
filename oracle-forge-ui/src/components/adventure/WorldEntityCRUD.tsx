@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import { AdventureAPI } from '@/api/apiClient';
 
 interface WorldEntity {
   name: string;

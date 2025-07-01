@@ -1,127 +1,99 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
+import config from "@/config.js";
+import {
+  useGetActiveAdventureQuery,
+  useListCustomMapsQuery,
+  useUploadCustomMapMutation,
+  useUploadAzgaarMapMutation,
+  useCheckAzgaarMapExistsQuery,
+} from "@/api/adventureApi";
 
-interface MapViewerProps {
-  adventure: string;
-}
+// Modes for the map viewer
+const MODES = {
+  AZGAAR: "azgaar",
+  CUSTOM: "custom",
+} as const;
+type MapMode = typeof MODES[keyof typeof MODES];
 
-type MapMode = 'azgaar' | 'custom';
-
-export default function MapViewer({ adventure }: MapViewerProps) {
+export default function MapViewer() {
+  // UI state
   const [visible, setVisible] = useState(false);
-  const [mode, setMode] = useState<MapMode>("custom");
-
-  // Azgaar map state
-  const [azgaarAvailable, setAzgaarAvailable] = useState(false);
-  const [azgaarChecking, setAzgaarChecking] = useState(true);
+  const [mode, setMode] = useState<MapMode>(MODES.CUSTOM);
   const [azgaarUploadFile, setAzgaarUploadFile] = useState<File | null>(null);
   const [azgaarStatus, setAzgaarStatus] = useState<string | null>(null);
-
-  // Custom map state
-  const [customMaps, setCustomMaps] = useState<string[]>([]);
-  const [customIndex, setCustomIndex] = useState(0);
   const [customUploadFile, setCustomUploadFile] = useState<File | null>(null);
   const [customStatus, setCustomStatus] = useState<string | null>(null);
-  const [customLoading, setCustomLoading] = useState(false);
+  const [customIndex, setCustomIndex] = useState(0);
 
-  // Check Azgaar map availability only when in Azgaar mode and visible
-  useEffect(() => {
-    if (!adventure || !visible || mode !== "azgaar") return;
-    
-    setAzgaarChecking(true);
-    fetch(`/adventures/${adventure}/map_file`, { method: "HEAD" })
-      .then(res => setAzgaarAvailable(res.ok))
-      .catch(() => setAzgaarAvailable(false))
-      .finally(() => setAzgaarChecking(false));
-  }, [adventure, azgaarStatus, visible, mode]);
+  // Get the active adventure name
+  const { data: activeData, isLoading: loadingActive, error: errorActive } = useGetActiveAdventureQuery();
+  const adventure = activeData?.active;
 
-  // Fetch custom maps
-  const fetchCustomMaps = async () => {
-    if (!adventure) return;
-    
-    setCustomLoading(true);
-    try {
-      // Note: This endpoint might need to be added to AdventureAPI
-      // For now, using direct fetch until we add it
-      const response = await fetch(`/adventures/${adventure}/custom_maps`);
-      const data = await response.json();
-      
-      if (data.success) {
-        setCustomMaps(data.data || []);
-        setCustomIndex(0);
-      } else {
-        console.error("Failed to fetch custom maps:", data.error);
-        setCustomMaps([]);
-      }
-    } catch (error) {
-      console.error("Error fetching custom maps:", error);
-      setCustomMaps([]);
-    } finally {
-      setCustomLoading(false);
-    }
-  };
+  // RTK Query hooks for Azgaar map
+  const {
+    data: azgaarAvailable,
+    isLoading: azgaarChecking,
+    error: azgaarCheckError,
+    refetch: refetchAzgaarAvailable,
+  } = useCheckAzgaarMapExistsQuery(adventure!, { skip: !adventure || !visible || mode !== MODES.AZGAAR });
+  const [uploadAzgaarMap, { isLoading: uploadingAzgaar }] = useUploadAzgaarMapMutation();
 
-  useEffect(() => {
-    fetchCustomMaps();
-  }, [adventure, customStatus]);
+  // RTK Query hooks for custom maps
+  const {
+    data: customMaps = [],
+    isLoading: customLoading,
+    error: customError,
+    refetch: refetchCustomMaps,
+  } = useListCustomMapsQuery(adventure!, { skip: !adventure || !visible || mode !== MODES.CUSTOM });
+  const [uploadCustomMap, { isLoading: uploadingCustom }] = useUploadCustomMapMutation();
 
-  // Azgaar map upload
-  const uploadAzgaar = async () => {
-    if (!azgaarUploadFile) return;
-    
-    const formData = new FormData();
-    formData.append("file", azgaarUploadFile);
+  // Azgaar map upload handler
+  const handleAzgaarUpload = async () => {
+    if (!azgaarUploadFile || !adventure) return;
     setAzgaarStatus(null);
-    
     try {
-      const res = await fetch(`/adventures/${adventure}/upload_map`, {
-        method: "POST",
-        body: formData,
-      });
-      const response = await res.json();
-      
+      const response = await uploadAzgaarMap({ adventure, file: azgaarUploadFile }).unwrap();
       if (response.success) {
         setAzgaarStatus("✅ Map uploaded!");
+        refetchAzgaarAvailable();
       } else {
-        console.error("Failed to upload Azgaar map:", response.error);
         setAzgaarStatus("❌ Upload failed.");
       }
-    } catch (error) {
-      console.error("Error uploading Azgaar map:", error);
+    } catch {
       setAzgaarStatus("❌ Upload failed.");
     }
   };
 
-  // Custom map upload
-  const uploadCustom = async () => {
-    if (!customUploadFile) return;
-    
-    const formData = new FormData();
-    formData.append("file", customUploadFile);
+  // Custom map upload handler
+  const handleCustomUpload = async () => {
+    if (!customUploadFile || !adventure) return;
     setCustomStatus(null);
-    
     try {
-      const res = await fetch(`/adventures/${adventure}/upload_custom_map`, {
-        method: "POST",
-        body: formData,
-      });
-      const response = await res.json();
-      
+      const response = await uploadCustomMap({ adventure, file: customUploadFile }).unwrap();
       if (response.success) {
         setCustomStatus("✅ Image uploaded!");
-        fetchCustomMaps();
+        refetchCustomMaps();
       } else {
-        console.error("Failed to upload custom map:", response.error);
         setCustomStatus("❌ Upload failed.");
       }
-    } catch (error) {
-      console.error("Error uploading custom map:", error);
+    } catch {
       setCustomStatus("❌ Upload failed.");
     }
   };
 
-  // Slideshow navigation
+  // Gallery navigation
   const nextCustom = () => setCustomIndex(i => (i + 1) % customMaps.length);
   const prevCustom = () => setCustomIndex(i => (i - 1 + customMaps.length) % customMaps.length);
+
+  // Reset gallery index if customMaps changes
+  if (customIndex >= customMaps.length && customMaps.length > 0) {
+    setCustomIndex(0);
+  }
+
+  // Loading and error states for the whole component
+  if (loadingActive) return <div>Loading map viewer...</div>;
+  if (errorActive) return <div className="text-red-400">Error loading active adventure.</div>;
+  if (!adventure) return <div>No active adventure found.</div>;
 
   return (
     <div className="bg-black rounded overflow-hidden p-4">
@@ -131,28 +103,29 @@ export default function MapViewer({ adventure }: MapViewerProps) {
       >
         {visible ? "Hide Map" : "Show Map"}
       </button>
-      
       {visible && (
         <div>
           <div className="mb-3">
             <button
-              className={`px-3 py-1 rounded mr-2 ${mode === "azgaar" ? "bg-blue-700 text-white" : "bg-gray-700 text-gray-200"}`}
-              onClick={() => setMode("azgaar")}
+              className={`px-3 py-1 rounded mr-2 ${mode === MODES.AZGAAR ? "bg-blue-700 text-white" : "bg-gray-700 text-gray-200"}`}
+              onClick={() => setMode(MODES.AZGAAR)}
             >
               Azgaar Map
             </button>
             <button
-              className={`px-3 py-1 rounded ${mode === "custom" ? "bg-blue-700 text-white" : "bg-gray-700 text-gray-200"}`}
-              onClick={() => setMode("custom")}
+              className={`px-3 py-1 rounded ${mode === MODES.CUSTOM ? "bg-blue-700 text-white" : "bg-gray-700 text-gray-200"}`}
+              onClick={() => setMode(MODES.CUSTOM)}
             >
               Custom Maps
             </button>
           </div>
-          
-          {mode === "azgaar" && (
+
+          {/* Azgaar Map Mode */}
+          {mode === MODES.AZGAAR && (
             <div>
+              {/* Azgaar map iframe (served from backend) */}
               <iframe
-                src="/azgaar/index.html"
+                src={`${config.SERVER_URL}/azgaar/index.html`}
                 title="Azgaar Map"
                 width="100%"
                 height="500"
@@ -165,17 +138,18 @@ export default function MapViewer({ adventure }: MapViewerProps) {
                 ) : azgaarAvailable ? (
                   <>
                     <a
-                      href={`/adventures/${adventure}/map_file`}
+                      href={`${config.SERVER_URL}/adventures/${adventure}/map_file`}
                       download
                       className="bg-blue-700 text-white px-3 py-1 rounded mr-2"
                     >
-                      Link to the saved map
+                      Saved map 
                     </a>
                     <span className="text-gray-300 ml-2">
-                      Download and load this file manually in Azgaar: <b>Menu → Load map → From .map file</b>.
-                      OR right click and copy link and in Azgaar: <b>Menu → Load map → From URL</b>
+                      Load this file manually in Azgaar: right click and copy link and in Azgaar: <b>Menu → Load map → From URL</b>
                     </span>
                   </>
+                ) : azgaarCheckError ? (
+                  <span className="text-red-400">Error checking map file.</span>
                 ) : (
                   <span className="text-gray-400">No map file found for this adventure. Upload one to enable manual loading.</span>
                 )}
@@ -186,20 +160,21 @@ export default function MapViewer({ adventure }: MapViewerProps) {
                     onChange={e => setAzgaarUploadFile(e.target.files?.[0] || null)}
                     className="mb-2"
                   />
-                  <button 
-                    onClick={uploadAzgaar} 
-                    disabled={!azgaarUploadFile}
+                  <button
+                    onClick={handleAzgaarUpload}
+                    disabled={!azgaarUploadFile || uploadingAzgaar}
                     className="bg-blue-700 text-white px-3 py-1 rounded ml-2"
                   >
-                    Upload Azgaar Map
+                    {uploadingAzgaar ? "Uploading..." : "Upload Azgaar Map"}
                   </button>
                   {azgaarStatus && <div className="mt-2 text-sm italic">{azgaarStatus}</div>}
                 </div>
               </div>
             </div>
           )}
-          
-          {mode === "custom" && (
+
+          {/* Custom Maps Mode */}
+          {mode === MODES.CUSTOM && (
             <div className="bg-gray-900 p-3 rounded">
               <h4 className="text-white font-semibold mb-2">Custom Map Gallery</h4>
               <input
@@ -208,24 +183,25 @@ export default function MapViewer({ adventure }: MapViewerProps) {
                 onChange={e => setCustomUploadFile(e.target.files?.[0] || null)}
                 className="mb-2"
               />
-              <button 
-                onClick={uploadCustom} 
-                disabled={!customUploadFile}
+              <button
+                onClick={handleCustomUpload}
+                disabled={!customUploadFile || uploadingCustom}
                 className="bg-blue-700 text-white px-3 py-1 rounded ml-2"
               >
-                Upload Image
+                {uploadingCustom ? "Uploading..." : "Upload Image"}
               </button>
               {customStatus && <div className="mt-2 text-sm italic">{customStatus}</div>}
-              
               <div className="mt-4">
                 {customLoading ? (
                   <span className="text-gray-400">Loading images...</span>
+                ) : customError ? (
+                  <span className="text-red-400">Error loading custom maps.</span>
                 ) : customMaps.length === 0 ? (
                   <span className="text-gray-400">No custom maps uploaded yet.</span>
                 ) : (
                   <div className="flex flex-col items-center">
                     <img
-                      src={`/adventures/${adventure}/custom_maps/${customMaps[customIndex]}`}
+                      src={`${config.SERVER_URL}/adventures/${adventure}/custom_maps/${customMaps[customIndex]}`}
                       alt="Custom Map"
                       style={{ maxWidth: "100%", maxHeight: 400, borderRadius: 8, border: "2px solid #333" }}
                     />
