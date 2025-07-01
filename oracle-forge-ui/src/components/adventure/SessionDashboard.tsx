@@ -65,8 +65,8 @@ export default function SessionDashboard() {
       <h2 className="text-xl font-bold mb-4">📘 Session Dashboard: {adventure.name}</h2>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <MapViewer />
-        {/* <PlayerPanel adventure={adventure.name} />
-        <WorldSummary adventure={adventure.name} /> */}
+        <PlayerPanel />
+        {/*<WorldSummary adventure={adventure.name} /> */}
         {/* <SessionJournal /> */}
       </div>
 

@@ -79,6 +79,52 @@ def clear_active_adventure_route():
     result = adventure_service.clear_active_adventure()
     return handle_service_response(result)
 
+@adventure.route("/adventures/<adv>/players", methods=["GET"])
+def list_players(adv):
+    """List all players for an adventure"""
+    try:
+        player_states = adventure_service.data_access.get_player_states(adv)
+        players = player_states.get('players', [])
+        player_data = []
+        for filename in players:
+            try:
+                data = adventure_service.data_access.get_player(adv, filename)
+                player_data.append(data)
+            except Exception:
+                continue
+        return APIResponse.success(player_data)
+    except Exception as e:
+        return APIResponse.internal_error(f"Failed to list players: {e}")
+
+@adventure.route("/adventures/<adv>/players", methods=["POST"])
+def create_player(adv):
+    """Create a new player for an adventure"""
+    try:
+        data = request.get_json()
+        if not data or 'name' not in data:
+            return APIResponse.bad_request("Missing player name")
+        player = adventure_service.data_access.create_player(adv, data)
+        return APIResponse.success(player)
+    except Exception as e:
+        return APIResponse.internal_error(f"Failed to create player: {e}")
+
+@adventure.route("/adventures/<adv>/players/<player_filename>", methods=["GET"])
+def get_player(adv, player_filename):
+    try:
+        player = adventure_service.data_access.get_player(adv, player_filename)
+        return APIResponse.success(player)
+    except Exception as e:
+        return APIResponse.internal_error(f"Failed to get player: {e}")
+
+@adventure.route("/adventures/<adv>/players/<player_filename>", methods=["PUT"])
+def update_player(adv, player_filename):
+    try:
+        data = request.get_json()
+        player = adventure_service.data_access.update_player(adv, player_filename, data)
+        return APIResponse.success(player)
+    except Exception as e:
+        return APIResponse.internal_error(f"Failed to update player: {e}")
+
 # Serve Azgaar map files from /server/azgaar/
 @adventure.route('/azgaar/<path:filename>')
 def serve_azgaar(filename):

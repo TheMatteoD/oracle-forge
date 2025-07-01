@@ -1,56 +1,40 @@
-import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useGetActiveAdventureQuery, useListPlayersQuery } from "@/api/adventureApi";
 import type { Player } from '@/types/api';
 import CharacterCreator from "./CharacterCreator";
 
-interface PlayerPanelProps {
-  adventure: string;
-}
-
-export default function PlayerPanel({ adventure }: PlayerPanelProps) {
-  const [players, setPlayers] = useState<Player[]>([]);
-  const [loading, setLoading] = useState(false);
+export default function PlayerPanel() {
   const navigate = useNavigate();
-
-  const loadPlayers = async () => {
-    setLoading(true);
-    try {
-      if (!adventure) {
-        setPlayers([]);
-        return;
-      }
-      // Use the correct endpoint for the adventure
-      const response = await fetch(`/adventures/${adventure}/players`);
-      const data = await response.json();
-      setPlayers(data.data || []);
-    } catch (error) {
-      console.error("Failed to load players:", error);
-      setPlayers([]);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    loadPlayers();
-  }, []);
+  // Get the active adventure
+  const { data: activeData, isLoading: loadingActive, error: errorActive } = useGetActiveAdventureQuery();
+  const adventure = activeData?.active;
+  // Fetch players for the active adventure
+  const { data: players = [], isLoading, error, refetch } = useListPlayersQuery(adventure!, { skip: !adventure });
 
   const handleCharacterCreated = (_newCharacter: Player) => {
     // Refresh the player list
-    loadPlayers();
+    refetch();
   };
 
   const handleCharacterClick = (characterName: string) => {
     navigate(`/character/${encodeURIComponent(characterName)}`);
   };
 
+  if (loadingActive || isLoading) {
+    return <div className="text-gray-400 text-sm">Loading players...</div>;
+  }
+  if (errorActive || error) {
+    return <div className="text-red-400 text-sm">Error loading players.</div>;
+  }
+  if (!adventure) {
+    return <div className="text-gray-400 text-sm">No active adventure.</div>;
+  }
+
   return (
     <div className="space-y-4">
       <div className="bg-gray-800 p-4 rounded shadow">
         <h3 className="text-lg font-semibold mb-2">🧙 Player Status</h3>
-        {loading ? (
-          <p className="text-gray-400 text-sm">Loading players...</p>
-        ) : players.length === 0 ? (
+        {players.length === 0 ? (
           <p className="text-gray-400 text-sm">No characters yet. Create one below!</p>
         ) : (
           players.map((player) => (
@@ -76,7 +60,6 @@ export default function PlayerPanel({ adventure }: PlayerPanelProps) {
           ))
         )}
       </div>
-      
       <CharacterCreator onCharacterCreated={handleCharacterCreated} />
     </div>
   );

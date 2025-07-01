@@ -97,6 +97,32 @@ export const adventureApi = createApi({
       }),
       transformResponse: (_: unknown, meta) => meta?.response?.status === 200,
     }),
+    listPlayers: builder.query<any[], string>({
+      query: (adventure) => `/adventures/${adventure}/players`,
+      transformResponse: createResponseTransformer<any[]>(),
+    }),
+    createPlayer: builder.mutation<any, { adventure: string; player: any }>({
+      query: ({ adventure, player }) => ({
+        url: `/adventures/${adventure}/players`,
+        method: 'POST',
+        body: player,
+        headers: { 'Content-Type': 'application/json' },
+      }),
+      transformResponse: createResponseTransformer<any>(),
+    }),
+    getPlayer: builder.query<any, { adventure: string; filename: string }>({
+      query: ({ adventure, filename }) => `/adventures/${adventure}/players/${filename}`,
+      transformResponse: createResponseTransformer<any>(),
+    }),
+    updatePlayer: builder.mutation<any, { adventure: string; filename: string; data: any }>({
+      query: ({ adventure, filename, data }) => ({
+        url: `/adventures/${adventure}/players/${filename}`,
+        method: 'PUT',
+        body: data,
+        headers: { 'Content-Type': 'application/json' },
+      }),
+      transformResponse: createResponseTransformer<any>(),
+    }),
   }),
 });
 
@@ -113,4 +139,8 @@ export const {
   useUploadAzgaarMapMutation,
   useGetAzgaarMapFileQuery,
   useCheckAzgaarMapExistsQuery,
+  useListPlayersQuery,
+  useCreatePlayerMutation,
+  useGetPlayerQuery,
+  useUpdatePlayerMutation,
 } = adventureApi; 
