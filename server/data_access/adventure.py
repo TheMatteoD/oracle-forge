@@ -334,8 +334,10 @@ class AdventureDataAccess(BaseDataAccess):
                     
                     # Save the updated world state
                     self.update_world_state(adventure_name, world_state)
-               else:
-       except Exception as e:
+                else:
+                    self.log_operation("_update_world_state_with_entity", 
+                                     f"Entity {entity_name} already in {field_name} list")
+        except Exception as e:
             # Log error but don't fail the entity creation
             self.log_operation("_update_world_state_with_entity", 
                              f"Failed to update world state for {entity_type} {entity_name}: {e}")
