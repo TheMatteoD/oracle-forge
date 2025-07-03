@@ -1,19 +1,12 @@
 import WorldStateSection from './WorldStateSection';
 import WorldEntityCRUD from './WorldEntityCRUD';
 
-interface WorldSummaryProps {
-  adventure: string;
-}
-
-export default function WorldSummary({ adventure }: WorldSummaryProps) {
-  if (!adventure) return null;
-
+export default function WorldSummary() {
   return (
     <div className="bg-gray-800 p-4 rounded shadow">
-      <WorldStateSection adventure={adventure} />
+      <WorldStateSection />
       
       <WorldEntityCRUD
-        adventure={adventure}
         entityType="factions"
         title="Factions"
         fields={[
@@ -24,7 +17,6 @@ export default function WorldSummary({ adventure }: WorldSummaryProps) {
       />
       
       <WorldEntityCRUD
-        adventure={adventure}
         entityType="locations"
         title="Locations"
         fields={[
@@ -35,7 +27,6 @@ export default function WorldSummary({ adventure }: WorldSummaryProps) {
       />
       
       <WorldEntityCRUD
-        adventure={adventure}
         entityType="story_lines"
         title="Story Lines"
         fields={[
@@ -46,7 +37,6 @@ export default function WorldSummary({ adventure }: WorldSummaryProps) {
       />
       
       <WorldEntityCRUD
-        adventure={adventure}
         entityType="npcs"
         title="NPCs"
         fields={[

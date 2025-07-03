@@ -254,6 +254,9 @@ class AdventureDataAccess(BaseDataAccess):
             entity_path
         )
         
+        # Update world state to include the new entity
+        self._update_world_state_with_entity(adventure_name, entity_type, entity_name)
+        
         self.log_operation("create_world_entity", f"Created {entity_type} {entity_name} in {adventure_name}")
         return entity_data
     
@@ -275,7 +278,18 @@ class AdventureDataAccess(BaseDataAccess):
                           entity_filename: str) -> bool:
         """Delete a world entity"""
         entity_path = os.path.join(self._get_world_entity_path(adventure_name, entity_type), entity_filename)
-        return self._delete_file(entity_path)
+        
+        # Extract entity name from filename for world state update
+        entity_name = entity_filename.replace('.yaml', '')
+        
+        # Delete the file
+        success = self._delete_file(entity_path)
+        
+        if success:
+            # Update world state to remove the entity
+            self._remove_entity_from_world_state(adventure_name, entity_type, entity_name)
+        
+        return success
     
     # Convenience methods for specific entity types
     def create_npc(self, adventure_name: str, npc_data: Dict[str, Any]) -> Dict[str, Any]:
@@ -292,4 +306,65 @@ class AdventureDataAccess(BaseDataAccess):
     
     def create_story_line(self, adventure_name: str, story_line_data: Dict[str, Any]) -> Dict[str, Any]:
         """Create a new story line"""
-        return self.create_world_entity(adventure_name, "story_lines", story_line_data) 
+        return self.create_world_entity(adventure_name, "story_lines", story_line_data)
+    
+    def _update_world_state_with_entity(self, adventure_name: str, entity_type: str, entity_name: str) -> None:
+        """Update world state to include a new entity"""
+        try:
+            # Load current world state
+            world_state = self.get_world_state(adventure_name)
+ 
+            # Map entity types to world state fields
+            entity_field_map = {
+                "npcs": "npcs",
+                "factions": "factions", 
+                "locations": "locations",
+                "story_lines": "story_lines"
+            }
+            
+            field_name = entity_field_map.get(entity_type)
+
+            if field_name:
+                # Get the current list and add the entity if not already present
+                entity_list = world_state.get(field_name, [])
+   
+                if entity_name not in entity_list:
+                    entity_list.append(entity_name)
+                    world_state[field_name] = entity_list
+                    
+                    # Save the updated world state
+                    self.update_world_state(adventure_name, world_state)
+               else:
+       except Exception as e:
+            # Log error but don't fail the entity creation
+            self.log_operation("_update_world_state_with_entity", 
+                             f"Failed to update world state for {entity_type} {entity_name}: {e}")
+    
+    def _remove_entity_from_world_state(self, adventure_name: str, entity_type: str, entity_name: str) -> None:
+        """Remove an entity from world state"""
+        try:
+            # Load current world state
+            world_state = self.get_world_state(adventure_name)
+            
+            # Map entity types to world state fields
+            entity_field_map = {
+                "npcs": "npcs",
+                "factions": "factions", 
+                "locations": "locations",
+                "story_lines": "story_lines"
+            }
+            
+            field_name = entity_field_map.get(entity_type)
+            if field_name:
+                # Get the current list and remove the entity if present
+                entity_list = world_state.get(field_name, [])
+                if entity_name in entity_list:
+                    entity_list.remove(entity_name)
+                    world_state[field_name] = entity_list
+                    
+                    # Save the updated world state
+                    self.update_world_state(adventure_name, world_state)
+        except Exception as e:
+            # Log error but don't fail the entity deletion
+            self.log_operation("_remove_entity_from_world_state", 
+                             f"Failed to remove {entity_type} {entity_name} from world state: {e}") 

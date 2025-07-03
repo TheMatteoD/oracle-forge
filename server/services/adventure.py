@@ -198,7 +198,9 @@ class AdventureService:
     def get_world_entity(self, adventure_name: str, entity_type: str, entity_name: str) -> Dict[str, Any]:
         """Get a specific world entity"""
         try:
-            entity_data = self.data_access.get_world_entity(adventure_name, entity_type, entity_name)
+            # Generate the expected filename for this entity
+            safe_filename = self.data_access._safe_filename(entity_name) + '.yaml'
+            entity_data = self.data_access.get_world_entity(adventure_name, entity_type, safe_filename)
             return {
                 "success": True,
                 "entity": entity_data
@@ -229,7 +231,9 @@ class AdventureService:
     def update_world_entity(self, adventure_name: str, entity_type: str, entity_name: str, entity_data: Dict[str, Any]) -> Dict[str, Any]:
         """Update a world entity"""
         try:
-            updated_entity = self.data_access.update_world_entity(adventure_name, entity_type, entity_name, entity_data)
+            # Generate the expected filename for this entity
+            safe_filename = self.data_access._safe_filename(entity_name) + '.yaml'
+            updated_entity = self.data_access.update_world_entity(adventure_name, entity_type, safe_filename, entity_data)
             logger.info(f"Updated {entity_type} {entity_name} for {adventure_name}")
             return {
                 "success": True,
@@ -245,7 +249,9 @@ class AdventureService:
     def delete_world_entity(self, adventure_name: str, entity_type: str, entity_name: str) -> Dict[str, Any]:
         """Delete a world entity"""
         try:
-            success = self.data_access.delete_world_entity(adventure_name, entity_type, entity_name)
+            # Generate the expected filename for this entity
+            safe_filename = self.data_access._safe_filename(entity_name) + '.yaml'
+            success = self.data_access.delete_world_entity(adventure_name, entity_type, safe_filename)
             if success:
                 logger.info(f"Deleted {entity_type} {entity_name} for {adventure_name}")
                 return {
@@ -259,6 +265,44 @@ class AdventureService:
                 }
         except DataAccessError as e:
             logger.error(f"Failed to delete {entity_type} {entity_name} for {adventure_name}: {e}")
+            return {
+                "success": False,
+                "error": str(e)
+            }
+    
+    def create_or_update_world_entity(self, adventure_name: str, entity_type: str, entity_name: str, data: Dict[str, Any]) -> Dict[str, Any]:
+        """Create or update a world entity"""
+        try:
+            entity_data = data.get("entity_data", {})
+            entity_data["name"] = entity_name  # Ensure name is set
+            
+            # Generate the expected filename for this entity
+            safe_filename = self.data_access._safe_filename(entity_name) + '.yaml'
+            
+            # Check if entity exists by trying to get it
+            existing_entity = self.data_access.get_world_entity(adventure_name, entity_type, safe_filename)
+            
+            # If we get here and the entity has a name, it exists
+            if existing_entity and existing_entity.get('name'):
+                # Entity exists, update it
+                updated_entity = self.data_access.update_world_entity(adventure_name, entity_type, safe_filename, entity_data)
+                logger.info(f"Updated {entity_type} {entity_name} for {adventure_name}")
+                return {
+                    "success": True,
+                    "entity": updated_entity,
+                    "message": f"{entity_type.title()} '{entity_name}' updated successfully"
+                }
+            else:
+                # Entity doesn't exist, create it
+                created_entity = self.data_access.create_world_entity(adventure_name, entity_type, entity_data)
+                logger.info(f"Created {entity_type} {entity_name} for {adventure_name}")
+                return {
+                    "success": True,
+                    "entity": created_entity,
+                    "message": f"{entity_type.title()} '{entity_name}' created successfully"
+                }
+        except DataAccessError as e:
+            logger.error(f"Failed to create/update {entity_type} {entity_name} for {adventure_name}: {e}")
             return {
                 "success": False,
                 "error": str(e)

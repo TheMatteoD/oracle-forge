@@ -4,6 +4,7 @@
 chaos_factor: 5  # Mythic oracle chaos factor (1-9)
 current_scene: 1  # Current scene number
 days_passed: 0  # Number of in-game days passed
+npcs: []  # List of active NPC IDs
 factions: []  # List of active faction IDs
 locations: []  # List of discovered location IDs
 preferred_rule_system: "Oracle Forge"  # Primary rule system being used

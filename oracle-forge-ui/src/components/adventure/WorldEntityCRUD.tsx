@@ -1,15 +1,14 @@
-import { useState, useEffect } from "react";
-
-interface WorldEntity {
-  name: string;
-  description?: string;
-  status?: string;
-  location?: string;
-  faction?: string;
-}
+import { useState } from "react";
+import { 
+  useGetActiveAdventureQuery,
+  useListWorldEntitiesQuery, 
+  useCreateWorldEntityMutation, 
+  useUpdateWorldEntityMutation, 
+  useDeleteWorldEntityMutation,
+  type WorldEntity 
+} from "@/api/adventureApi";
 
 interface WorldEntityCRUDProps {
-  adventure: string;
   entityType: 'factions' | 'locations' | 'story_lines' | 'npcs';
   title: string;
   fields: {
@@ -20,68 +19,42 @@ interface WorldEntityCRUDProps {
 }
 
 export default function WorldEntityCRUD({ 
-  adventure, 
   entityType, 
   title, 
   fields 
 }: WorldEntityCRUDProps) {
-  const [entities, setEntities] = useState<WorldEntity[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [showAdd, setShowAdd] = useState(false);
   const [editEntity, setEditEntity] = useState<string | null>(null);
   const [form, setForm] = useState<WorldEntity>({ name: '', description: '', status: '' });
 
-  const fetchEntities = async () => {
-    setLoading(true);
-    try {
-      const response = await AdventureAPI.listWorldEntities(adventure, entityType);
-      
-      if (response.success && response.data) {
-        setEntities(response.data);
-      } else {
-        console.error(`Failed to fetch ${entityType}:`, response.error);
-        setEntities([]);
-      }
-    } catch (error) {
-      console.error(`Error fetching ${entityType}:`, error);
-      setError(`Failed to load ${entityType}.`);
-      setEntities([]);
-    } finally {
-      setLoading(false);
-    }
-  };
+  // Get the active adventure
+  const { data: activeData, isLoading: loadingActive, error: errorActive } = useGetActiveAdventureQuery();
+  const adventure = activeData?.active;
 
-  useEffect(() => { 
-    if (adventure) fetchEntities(); 
-  }, [adventure, entityType]);
+  // RTK Query hooks
+  const { data: entities = [], isLoading, error, refetch } = useListWorldEntitiesQuery(
+    { adventure: adventure!, entityType }, 
+    { skip: !adventure }
+  );
+
+  const [createEntity, { isLoading: isCreating }] = useCreateWorldEntityMutation();
+  const [updateEntity, { isLoading: isUpdating }] = useUpdateWorldEntityMutation();
+  const [deleteEntity, { isLoading: isDeleting }] = useDeleteWorldEntityMutation();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
   const handleAdd = async () => {
-    if (!form.name.trim()) return;
+    if (!form.name.trim() || !adventure) return;
     
-    setLoading(true);
     try {
-      const response = await AdventureAPI.createWorldEntity(adventure, entityType, {
-        data: form
-      });
-      
-      if (response.success) {
-        setShowAdd(false);
-        setForm({ name: '', description: '', status: '' });
-        fetchEntities();
-      } else {
-        console.error(`Failed to add ${entityType}:`, response.error);
-        setError(`Failed to add ${entityType}.`);
-      }
+      await createEntity({ adventure, entityType, entityData: form }).unwrap();
+      setShowAdd(false);
+      setForm({ name: '', description: '', status: '' });
+      refetch();
     } catch (error) {
-      console.error(`Error adding ${entityType}:`, error);
-      setError(`Failed to add ${entityType}.`);
-    } finally {
-      setLoading(false);
+      console.error(`Failed to add ${entityType}:`, error);
     }
   };
 
@@ -91,48 +64,26 @@ export default function WorldEntityCRUD({
   };
 
   const handleUpdate = async () => {
-    if (!editEntity || !form.name.trim()) return;
+    if (!editEntity || !form.name.trim() || !adventure) return;
     
-    setLoading(true);
     try {
-      const response = await AdventureAPI.updateWorldEntity(adventure, entityType, editEntity, {
-        data: form
-      });
-      
-      if (response.success) {
-        setEditEntity(null);
-        setForm({ name: '', description: '', status: '' });
-        fetchEntities();
-      } else {
-        console.error(`Failed to update ${entityType}:`, response.error);
-        setError(`Failed to update ${entityType}.`);
-      }
+      await updateEntity({ adventure, entityType, entityName: editEntity, entityData: form }).unwrap();
+      setEditEntity(null);
+      setForm({ name: '', description: '', status: '' });
+      refetch();
     } catch (error) {
-      console.error(`Error updating ${entityType}:`, error);
-      setError(`Failed to update ${entityType}.`);
-    } finally {
-      setLoading(false);
+      console.error(`Failed to update ${entityType}:`, error);
     }
   };
 
   const handleDelete = async (name: string) => {
-    if (!window.confirm(`Delete ${entityType.slice(0, -1)} '${name}'?`)) return;
+    if (!window.confirm(`Delete ${entityType.slice(0, -1)} '${name}'?`) || !adventure) return;
     
-    setLoading(true);
     try {
-      const response = await AdventureAPI.deleteWorldEntity(adventure, entityType, name);
-      
-      if (response.success) {
-        fetchEntities();
-      } else {
-        console.error(`Failed to delete ${entityType}:`, response.error);
-        setError(`Failed to delete ${entityType}.`);
-      }
+      await deleteEntity({ adventure, entityType, entityName: name }).unwrap();
+      refetch();
     } catch (error) {
-      console.error(`Error deleting ${entityType}:`, error);
-      setError(`Failed to delete ${entityType}.`);
-    } finally {
-      setLoading(false);
+      console.error(`Failed to delete ${entityType}:`, error);
     }
   };
 
@@ -142,13 +93,19 @@ export default function WorldEntityCRUD({
     setEditEntity(null);
   };
 
+  const isLoadingAny = loadingActive || isLoading || isCreating || isUpdating || isDeleting;
+
+  if (loadingActive) return <div className="text-gray-400">Loading...</div>;
+  if (errorActive) return <div className="text-red-400">Error loading adventure.</div>;
+  if (!adventure) return <div className="text-gray-400">No active adventure.</div>;
+
   return (
     <div className="mt-4">
       <h4 className="font-semibold">{title}</h4>
       
-      {error && <div className="text-red-400 mb-2">{error}</div>}
+      {error && <div className="text-red-400 mb-2">Error loading {entityType}.</div>}
       
-      {loading && <div>Loading...</div>}
+      {isLoadingAny && <div>Loading...</div>}
       
       <ul className="text-sm list-disc ml-5">
         {entities.map((entity, i) => (
@@ -158,12 +115,14 @@ export default function WorldEntityCRUD({
             <button 
               className="ml-2 text-blue-400 underline" 
               onClick={() => handleEdit(entity)}
+              disabled={isLoadingAny}
             >
               Edit
             </button>
             <button 
               className="ml-2 text-red-400 underline" 
               onClick={() => handleDelete(entity.name)}
+              disabled={isLoadingAny}
             >
               Delete
             </button>
@@ -185,14 +144,14 @@ export default function WorldEntityCRUD({
           ))}
           <button 
             onClick={handleAdd} 
-            disabled={loading || !form.name.trim()}
-            className="bg-green-600 px-2 py-1 rounded text-white"
+            disabled={isCreating || !form.name.trim()}
+            className="bg-green-600 px-3 py-1 rounded text-white"
           >
-            Add
+            {isCreating ? 'Adding...' : 'Add'}
           </button>
           <button 
             onClick={resetForm} 
-            className="ml-2 px-2 py-1 rounded bg-gray-600 text-white"
+            className="ml-2 px-3 py-1 rounded bg-gray-600 text-white"
           >
             Cancel
           </button>
@@ -213,14 +172,14 @@ export default function WorldEntityCRUD({
           ))}
           <button 
             onClick={handleUpdate} 
-            disabled={loading || !form.name.trim()}
-            className="bg-green-600 px-2 py-1 rounded text-white"
+            disabled={isUpdating || !form.name.trim()}
+            className="bg-blue-600 px-3 py-1 rounded text-white"
           >
-            Save
+            {isUpdating ? 'Updating...' : 'Update'}
           </button>
           <button 
             onClick={resetForm} 
-            className="ml-2 px-2 py-1 rounded bg-gray-600 text-white"
+            className="ml-2 px-3 py-1 rounded bg-gray-600 text-white"
           >
             Cancel
           </button>
@@ -230,7 +189,8 @@ export default function WorldEntityCRUD({
       {!showAdd && !editEntity && (
         <button 
           onClick={() => setShowAdd(true)} 
-          className="mt-2 px-2 py-1 rounded bg-blue-600 text-white"
+          className="mt-2 px-3 py-1 rounded bg-blue-600 text-white"
+          disabled={isLoadingAny}
         >
           Add {title.slice(0, -1)}
         </button>

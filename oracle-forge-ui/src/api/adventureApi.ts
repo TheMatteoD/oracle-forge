@@ -13,6 +13,20 @@ export interface Adventure {
   };
 }
 
+export interface WorldEntity {
+  name: string;
+  description?: string;
+  status?: string;
+  location?: string;
+  faction?: string;
+}
+
+export interface WorldState {
+  chaos_factor?: number;
+  current_scene?: number;
+  days_passed?: number;
+}
+
 export interface ActiveAdventureResponse {
   active?: string;
 }
@@ -136,6 +150,68 @@ export const adventureApi = createApi({
       }),
       transformResponse: createResponseTransformer<any>(),
     }),
+    // World State Management
+    getWorldState: builder.query<WorldState, string>({
+      query: (adventure) => `/adventures/${adventure}/world_state`,
+      transformResponse: createResponseTransformer<WorldState>(),
+    }),
+    updateWorldState: builder.mutation<WorldState, { adventure: string; data: WorldState }>({
+      query: ({ adventure, data }) => ({
+        url: `/adventures/${adventure}/world_state`,
+        method: 'POST',
+        body: data,
+        headers: { 'Content-Type': 'application/json' },
+      }),
+      transformResponse: createResponseTransformer<WorldState>(),
+    }),
+    // World Entity Management
+    listWorldEntities: builder.query<WorldEntity[], { adventure: string; entityType: string }>({
+      query: ({ adventure, entityType }) => ({
+        url: `/adventures/${adventure}/world/${entityType}`,
+        method: 'GET',
+      }),
+      transformResponse: (response: any) => {
+        return response.data?.entities || [];
+      },
+    }),
+    getWorldEntity: builder.query<WorldEntity, { adventure: string; entityType: string; entityName: string }>({
+      query: ({ adventure, entityType, entityName }) => ({
+        url: `/adventures/${adventure}/world/${entityType}/${entityName}`,
+        method: 'GET',
+      }),
+      transformResponse: (response: any) => {
+        return response.data?.entity || {};
+      },
+    }),
+    createWorldEntity: builder.mutation<WorldEntity, { adventure: string; entityType: string; entityData: WorldEntity }>({
+      query: ({ adventure, entityType, entityData }) => ({
+        url: `/adventures/${adventure}/world/${entityType}/${entityData.name}`,
+        method: 'POST',
+        body: { entity_data: entityData },
+      }),
+      transformResponse: (response: any) => {
+        return response.data?.entity || {};
+      },
+    }),
+    updateWorldEntity: builder.mutation<WorldEntity, { adventure: string; entityType: string; entityName: string; entityData: WorldEntity }>({
+      query: ({ adventure, entityType, entityName, entityData }) => ({
+        url: `/adventures/${adventure}/world/${entityType}/${entityName}`,
+        method: 'POST',
+        body: { entity_data: entityData },
+      }),
+      transformResponse: (response: any) => {
+        return response.data?.entity || {};
+      },
+    }),
+    deleteWorldEntity: builder.mutation<void, { adventure: string; entityType: string; entityName: string }>({
+      query: ({ adventure, entityType, entityName }) => ({
+        url: `/adventures/${adventure}/world/${entityType}/${entityName}`,
+        method: 'DELETE',
+      }),
+      transformResponse: (response: any) => {
+        return response.data;
+      },
+    }),
   }),
 });
 
@@ -157,4 +233,11 @@ export const {
   useGetPlayerQuery,
   useUpdatePlayerMutation,
   useClearActiveAdventureMutation,
+  useGetWorldStateQuery,
+  useUpdateWorldStateMutation,
+  useListWorldEntitiesQuery,
+  useGetWorldEntityQuery,
+  useCreateWorldEntityMutation,
+  useUpdateWorldEntityMutation,
+  useDeleteWorldEntityMutation,
 } = adventureApi; 

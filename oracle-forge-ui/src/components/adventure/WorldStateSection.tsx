@@ -1,100 +1,55 @@
 import { useState, useEffect } from "react";
+import { useGetActiveAdventureQuery, useGetWorldStateQuery, useUpdateWorldStateMutation, type WorldState } from "@/api/adventureApi";
 
-interface WorldStateSectionProps {
-  adventure: string;
-}
-
-interface WorldState {
-  chaos_factor?: string;
-  current_scene?: string;
-  days_passed?: string;
-}
-
-export default function WorldStateSection({ adventure }: WorldStateSectionProps) {
-  const [world, setWorld] = useState<WorldState>({});
+export default function WorldStateSection() {
   const [edit, setEdit] = useState(false);
   const [form, setForm] = useState<WorldState>({ 
-    chaos_factor: '', 
-    current_scene: '', 
-    days_passed: '' 
+    chaos_factor: 0, 
+    current_scene: 0, 
+    days_passed: 0 
   });
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   
+  // Get the active adventure
+  const { data: activeData, isLoading: loadingActive, error: errorActive } = useGetActiveAdventureQuery();
+  const adventure = activeData?.active;
+  
+  // RTK Query hooks
+  const { data: world, isLoading, error } = useGetWorldStateQuery(adventure!, { skip: !adventure });
+  const [updateWorldState, { isLoading: isUpdating }] = useUpdateWorldStateMutation();
+  
+  // Update form when world data changes
   useEffect(() => {
-    if (!adventure) return;
-    
-    const loadWorldState = async () => {
-      try {
-        // Note: This endpoint might need to be added to AdventureAPI
-        // For now, using direct fetch until we add it
-        const response = await fetch(`/adventures/${adventure}/world_state`);
-        const data = await response.json();
-        
-        if (data.success && data.data) {
-          setWorld(data.data);
-          setForm({
-            chaos_factor: data.data.chaos_factor || '',
-            current_scene: data.data.current_scene || '',
-            days_passed: data.data.days_passed || ''
-          });
-        } else {
-          setError('Failed to load world state.');
-        }
-      } catch (error) {
-        console.error("Error loading world state:", error);
-        setError('Failed to load world state.');
-      }
-    };
-
-    loadWorldState();
-  }, [adventure]);
+    if (world) {
+      setForm({
+        chaos_factor: world.chaos_factor || 0,
+        current_scene: world.current_scene || 0,
+        days_passed: world.days_passed || 0
+      });
+    }
+  }, [world]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+    const value = e.target.type === 'number' ? parseInt(e.target.value) || 0 : e.target.value;
+    setForm({ ...form, [e.target.name]: value });
   };
 
   const handleSave = async () => {
-    setLoading(true);
-    setError(null);
-    
+    if (!adventure) return;
     try {
-      // Note: This endpoint might need to be added to AdventureAPI
-      // For now, using direct fetch until we add it
-      const response = await fetch(`/adventures/${adventure}/world_state`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          ...world,
-          chaos_factor: form.chaos_factor,
-          current_scene: form.current_scene,
-          days_passed: form.days_passed
-        })
-      });
-      
-      const data = await response.json();
-      
-      if (data.success) {
-        setEdit(false);
-        setWorld((prev) => ({ ...prev, ...form }));
-      } else {
-        setError('Failed to save world state.');
-      }
+      await updateWorldState({ adventure, data: form }).unwrap();
+      setEdit(false);
     } catch (error) {
       console.error("Error saving world state:", error);
-      setError('Failed to save world state.');
-    } finally {
-      setLoading(false);
     }
   };
 
-  if (!adventure) return null;
+  if (loadingActive || isLoading) return <div className="text-gray-400">Loading world state...</div>;
+  if (errorActive || error) return <div className="text-red-400">Error loading world state.</div>;
+  if (!adventure) return <div className="text-gray-400">No active adventure.</div>;
 
   return (
     <div className="bg-gray-800 p-4 rounded shadow">
       <h3 className="text-lg font-semibold mb-2">🌍 World State</h3>
-      
-      {error && <div className="text-red-400 mb-2">{error}</div>}
       
       {edit ? (
         <div className="space-y-2">
@@ -102,6 +57,7 @@ export default function WorldStateSection({ adventure }: WorldStateSectionProps)
             <label>Scene: </label>
             <input 
               name="current_scene" 
+              type="number"
               value={form.current_scene} 
               onChange={handleChange} 
               className="bg-gray-700 text-white px-2 py-1 rounded" 
@@ -111,6 +67,7 @@ export default function WorldStateSection({ adventure }: WorldStateSectionProps)
             <label>Chaos: </label>
             <input 
               name="chaos_factor" 
+              type="number"
               value={form.chaos_factor} 
               onChange={handleChange} 
               className="bg-gray-700 text-white px-2 py-1 rounded" 
@@ -120,6 +77,7 @@ export default function WorldStateSection({ adventure }: WorldStateSectionProps)
             <label>Days Passed: </label>
             <input 
               name="days_passed" 
+              type="number"
               value={form.days_passed} 
               onChange={handleChange} 
               className="bg-gray-700 text-white px-2 py-1 rounded" 
@@ -127,10 +85,10 @@ export default function WorldStateSection({ adventure }: WorldStateSectionProps)
           </div>
           <button 
             onClick={handleSave} 
-            disabled={loading} 
+            disabled={isUpdating} 
             className="bg-green-600 px-3 py-1 rounded text-white mt-2"
           >
-            {loading ? 'Saving...' : 'Save'}
+            {isUpdating ? 'Saving...' : 'Save'}
           </button>
           <button 
             onClick={() => setEdit(false)} 
@@ -142,9 +100,9 @@ export default function WorldStateSection({ adventure }: WorldStateSectionProps)
       ) : (
         <div>
           <div>
-            <strong>Scene:</strong> {world.current_scene} | 
-            <strong>Chaos:</strong> {world.chaos_factor} | 
-            <strong>Days:</strong> {world.days_passed}
+            <strong>Scene:</strong> {world?.current_scene || 0} | 
+            <strong>Chaos:</strong> {world?.chaos_factor || 0} | 
+            <strong>Days:</strong> {world?.days_passed || 0}
           </div>
           <button 
             onClick={() => setEdit(true)} 

@@ -71,7 +71,7 @@ export default function SessionDashboard() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <MapViewer />
         <PlayerPanel />
-        {/*<WorldSummary adventure={adventure.name} /> */}
+        <WorldSummary />
         {/* <SessionJournal /> */}
       </div>
 
