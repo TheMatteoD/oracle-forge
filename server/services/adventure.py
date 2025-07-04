@@ -181,7 +181,20 @@ class AdventureService:
     def list_world_entities(self, adventure_name: str, entity_type: str) -> Dict[str, Any]:
         """List all entities of a specific type"""
         try:
-            entities = self.data_access.list_world_entities(adventure_name, entity_type)
+            # Get list of entity filenames
+            entity_filenames = self.data_access.list_world_entities(adventure_name, entity_type)
+            
+            # Load actual entity data for each filename
+            entities = []
+            for filename in entity_filenames:
+                try:
+                    entity_data = self.data_access.get_world_entity(adventure_name, entity_type, filename)
+                    if entity_data and entity_data.get('name'):
+                        entities.append(entity_data)
+                except DataAccessError as e:
+                    logger.warning(f"Failed to load entity {filename}: {e}")
+                    continue
+            
             return {
                 "success": True,
                 "entities": entities,

@@ -21,6 +21,11 @@ export interface WorldEntity {
   faction?: string;
 }
 
+type ListEntitiesArgs = {
+  adventure: string
+  entityType: string
+}
+
 export interface WorldState {
   chaos_factor?: number;
   current_scene?: number;
@@ -165,13 +170,18 @@ export const adventureApi = createApi({
       transformResponse: createResponseTransformer<WorldState>(),
     }),
     // World Entity Management
-    listWorldEntities: builder.query<WorldEntity[], { adventure: string; entityType: string }>({
-      query: ({ adventure, entityType }) => ({
-        url: `/adventures/${adventure}/world/${entityType}`,
-        method: 'GET',
-      }),
+    listWorldEntities: builder.query<WorldEntity[], ListEntitiesArgs>({
+      query: ({ adventure, entityType }) =>
+        `adventures/${adventure}/world/${entityType}`,
       transformResponse: (response: any) => {
-        return response.data?.entities || [];
+        // server returns the array directly under “data”
+        if (Array.isArray(response.data)) {
+          return response.data;
+        }
+        // fallback (in case data is ever wrapped under .entities)
+        return Array.isArray(response.data?.entities)
+          ? response.data.entities
+          : [];
       },
     }),
     getWorldEntity: builder.query<WorldEntity, { adventure: string; entityType: string; entityName: string }>({
