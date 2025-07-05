@@ -72,7 +72,7 @@ export default function SessionDashboard() {
         <MapViewer />
         <PlayerPanel />
         <WorldSummary />
-        {/* <SessionJournal /> */}
+        <SessionJournal />
       </div>
 
       <div className="flex gap-4 mt-6 mb-5">

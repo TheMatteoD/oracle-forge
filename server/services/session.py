@@ -269,24 +269,14 @@ class SessionService:
                     "error": "No active adventure",
                     "log": []
                 }
-            
+
             if session_id:
                 session_data = self.data_access.get_session(adventure_name, session_id)
-                log = session_data.get("log", [])
             else:
-                # Get the latest session
-                sessions = self.data_access.list_sessions(adventure_name)
-                if not sessions:
-                    return {
-                        "success": False,
-                        "error": "No session log found",
-                        "log": []
-                    }
-                
-                latest_session = sessions[-1]  # Assuming sorted by name
-                session_data = self.data_access.get_session(adventure_name, latest_session)
-                log = session_data.get("log", [])
-            
+                # Always get the active session for the current log
+                session_data = self.data_access.get_active_session(adventure_name)
+
+            log = session_data.get("log", [])
             return {
                 "success": True,
                 "log": log,

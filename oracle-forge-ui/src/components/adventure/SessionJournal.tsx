@@ -1,68 +1,30 @@
-import { useState, useEffect } from "react";
-
-interface LogEntry {
-  timestamp: string;
-  type: string;
-  content: string;
-}
+import { useState } from "react";
+import { useGetSessionLogQuery, useAppendSessionLogMutation, LogEntry } from "@/api/sessionApi";
 
 export default function SessionJournal() {
   const [note, setNote] = useState("");
   const [status, setStatus] = useState<string | null>(null);
-  const [log, setLog] = useState<LogEntry[]>([]);
-  const [loading, setLoading] = useState(false);
-
-  const fetchLog = async () => {
-    setLoading(true);
-    try {
-      // Note: This endpoint might need to be added to AdventureAPI
-      // For now, using direct fetch until we add it
-      const response = await fetch('/session/log');
-      const data = await response.json();
-      
-      if (data.success) {
-        setLog(Array.isArray(data.data) ? data.data : []);
-      } else {
-        console.error("Failed to fetch log:", data.error);
-        setLog([]);
-      }
-    } catch (error) {
-      console.error("Error fetching log:", error);
-      setLog([]);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchLog();
-  }, []);
+  
+  // RTK Query hooks
+  const { data: log = [], isLoading, error } = useGetSessionLogQuery();
+  const [appendLog, { isLoading: isSaving }] = useAppendSessionLogMutation();
 
   const submitNote = async () => {
     if (!note.trim()) return;
     
     try {
-      // Note: This endpoint might need to be added to AdventureAPI
-      // For now, using direct fetch until we add it
-      const response = await fetch('/session/log', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ content: note, type: "note" })
-      });
+      await appendLog({ content: note, type: "note" }).unwrap();
+      setNote("");
+      setStatus("Saved!");
       
-      const data = await response.json();
-      
-      if (data.success) {
-        setNote("");
-        setStatus("Saved!");
-        fetchLog();
-      } else {
-        console.error("Failed to save note:", data.error);
-        setStatus("Error saving note.");
-      }
+      // Clear status after 2 seconds
+      setTimeout(() => setStatus(null), 2000);
     } catch (error) {
       console.error("Error saving note:", error);
       setStatus("Error saving note.");
+      
+      // Clear error status after 3 seconds
+      setTimeout(() => setStatus(null), 3000);
     }
   };
 
@@ -74,8 +36,10 @@ export default function SessionJournal() {
     <div className="bg-gray-800 p-4 rounded shadow">
       <h3 className="text-lg font-semibold mb-2">📝 Session Journal</h3>
       
-      {loading ? (
+      {isLoading ? (
         <div>Loading log...</div>
+      ) : error ? (
+        <div className="text-red-400">Error loading log entries.</div>
       ) : (
         <div className="mb-3 max-h-48 overflow-y-auto bg-gray-900 p-2 rounded">
           {log.length === 0 && (
@@ -103,11 +67,11 @@ export default function SessionJournal() {
       />
       
       <button 
-        className="mt-2 px-3 py-1 bg-green-700 text-white rounded" 
+        className="mt-2 px-3 py-1 bg-green-700 text-white rounded disabled:opacity-50" 
         onClick={submitNote}
-        disabled={!note.trim()}
+        disabled={!note.trim() || isSaving}
       >
-        Save Note
+        {isSaving ? "Saving..." : "Save Note"}
       </button>
       
       {status && <div className="mt-2 text-sm italic">{status}</div>}
