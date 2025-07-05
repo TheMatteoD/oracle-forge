@@ -362,7 +362,7 @@ class SessionService:
             }
     
     def end_session(self) -> Dict[str, Any]:
-        """End the current session and generate summary"""
+        """End the current session and generate summary, archive it, and reset active session"""
         try:
             adventure_name = self.get_active_adventure()
             if not adventure_name:
@@ -393,14 +393,49 @@ class SessionService:
             active_session["end_time"] = datetime.now().isoformat()
             active_session["status"] = "ended"
             
-            updated_session = self.data_access.update_active_session(adventure_name, active_session)
+            # Archive the finished session to sessions/session_XX.yaml
+            from server.utils.paths import get_adventure_path
+            import shutil
+            sessions_dir = os.path.join(get_adventure_path(adventure_name), "sessions")
+            os.makedirs(sessions_dir, exist_ok=True)
+            # Find next session number
+            existing = [f for f in os.listdir(sessions_dir) if f.startswith("session_") and f.endswith(".yaml")]
+            numbers = [int(f.split("_")[1].split(".")[0]) for f in existing if f.split("_")[1].split(".")[0].isdigit()]
+            next_num = max(numbers) + 1 if numbers else 1
+            session_id = f"session_{next_num:02d}"
+            session_filename = f"{session_id}.yaml"
+            session_path = os.path.join(sessions_dir, session_filename)
+            # Save the finished session
+            import yaml
+            with open(session_path, "w") as f:
+                yaml.safe_dump(active_session, f, sort_keys=False, allow_unicode=True)
             
-            logger.info(f"Ended session for adventure '{adventure_name}'")
+            # Create new active_session.yaml from template
+            from server.utils.paths import get_vault_template_path, get_adventure_file_path
+            template_path = get_vault_template_path("adventures/active_session.yaml")
+            with open(template_path, "r") as f:
+                template_data = yaml.safe_load(f)
+            template_data["adventure"] = adventure_name
+            template_data["session_id"] = f"session_{next_num+1:02d}"
+            template_data["log"] = []
+            # Optionally reset metadata
+            if "metadata" in template_data:
+                template_data["metadata"]["start_time"] = datetime.now().isoformat()
+                template_data["metadata"]["duration"] = ""
+                template_data["metadata"]["scene_count"] = 0
+                template_data["metadata"]["oracle_questions"] = 0
+            # Save new active_session.yaml
+            active_session_path = get_adventure_file_path(adventure_name, "active_session.yaml")
+            with open(active_session_path, "w") as f:
+                yaml.safe_dump(template_data, f, sort_keys=False, allow_unicode=True)
+            
+            logger.info(f"Ended session for adventure '{adventure_name}', archived as {session_filename}")
             return {
                 "success": True,
-                "session": updated_session,
+                "session": active_session,
                 "summary": summary,
-                "message": "Session ended successfully"
+                "session_id": session_id,
+                "message": "Session ended and archived successfully"
             }
         except DataAccessError as e:
             logger.error(f"Failed to end session: {e}")

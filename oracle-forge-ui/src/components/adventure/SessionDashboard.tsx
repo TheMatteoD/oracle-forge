@@ -3,7 +3,7 @@ import PlayerPanel from "./PlayerPanel";
 import WorldSummary from "./WorldSummary";
 import SessionJournal from "./SessionJournal";
 import MapViewer from "./MapViewer";
-import { useEndSessionMutation } from "@/api/sessionApi";
+import { useEndSessionMutation, useGetSessionLogQuery } from "@/api/sessionApi";
 import { useGetActiveAdventureQuery, useGetAdventureQuery, useClearActiveAdventureMutation } from "@/api/adventureApi";
 
 export default function SessionDashboard() {
@@ -21,6 +21,10 @@ export default function SessionDashboard() {
   // Fetch the full adventure data
   const { data: adventure, isLoading: loadingAdventure, error: errorAdventure } = useGetAdventureQuery(activeAdventureName!, { skip: !activeAdventureName });
 
+  // Use the up-to-date session log from RTK Query
+  const { data: sessionLog = [], isLoading: logLoading } = useGetSessionLogQuery();
+  const canEndSession = sessionLog.length > 0;
+
   if (loadingActive || loadingAdventure) {
     return <div>Loading session dashboard...</div>;
   }
@@ -30,10 +34,6 @@ export default function SessionDashboard() {
   if (!adventure) {
     return <div>No active adventure found.</div>;
   }
-
-  // Determine if session can be ended (must have at least one log entry)
-  const sessionLog = adventure.active_session?.log || [];
-  const canEndSession = sessionLog.length > 0;
 
   const leaveAdventure = async () => {
     try {
@@ -85,7 +85,7 @@ export default function SessionDashboard() {
         <button
           onClick={handleEndSession}
           className="px-4 py-2 bg-purple-700 text-white rounded"
-          disabled={ending || !canEndSession}
+          disabled={ending || !canEndSession || logLoading}
         >
           {ending ? "Ending Session..." : "End Session"}
         </button>

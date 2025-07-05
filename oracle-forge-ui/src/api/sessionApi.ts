@@ -16,6 +16,7 @@ export interface AppendLogRequest {
 export const sessionApi = createApi({
   reducerPath: 'sessionApi',
   baseQuery: fetchBaseQuery({ baseUrl: config.SERVER_URL }),
+  tagTypes: ['SessionLog'],
   endpoints: (builder) => ({
     endSession: builder.mutation<any, void>({
       query: () => ({
@@ -23,10 +24,12 @@ export const sessionApi = createApi({
         method: 'POST',
       }),
       transformResponse: createResponseTransformer<any>(),
+      invalidatesTags: ['SessionLog'],
     }),
     getSessionLog: builder.query<LogEntry[], void>({
       query: () => '/session/log',
       transformResponse: createResponseTransformer<LogEntry[]>(),
+      providesTags: ['SessionLog'],
     }),
     appendSessionLog: builder.mutation<LogEntry, AppendLogRequest>({
       query: (body) => ({
@@ -35,6 +38,7 @@ export const sessionApi = createApi({
         body,
       }),
       transformResponse: createResponseTransformer<LogEntry>(),
+      invalidatesTags: ['SessionLog'],
     }),
     // Add other session endpoints here as needed
   }),
