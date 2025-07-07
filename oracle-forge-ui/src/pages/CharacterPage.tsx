@@ -106,10 +106,14 @@ const CharacterPage: React.FC = () => {
   const [editPlayer, setEditPlayer] = useState<any | null>(null);
   const [editError, setEditError] = useState('');
   const [editSuccess, setEditSuccess] = useState('');
+  const [playerFilename, setPlayerFilename] = useState<string | null>(null);
 
   React.useEffect(() => {
     if (player) {
       setEditPlayer(deepClone(player));
+      if (player.filename) {
+        setPlayerFilename(player.filename);
+      }
     }
   }, [player]);
 
@@ -128,9 +132,10 @@ const CharacterPage: React.FC = () => {
     setEditError('');
     setEditSuccess('');
     try {
+      if (!playerFilename) throw new Error('No player filename available');
       await updatePlayer({
         adventure,
-        filename: `${characterName}.yaml`,
+        filename: playerFilename,
         data: editPlayer,
       }).unwrap();
       setEditSuccess('Character updated!');

@@ -126,6 +126,8 @@ class AdventureDataAccess(BaseDataAccess):
             player_data,
             player_path
         )
+        # Add filename to returned data
+        player_data['filename'] = safe_filename
         
         # Update player_states.yaml to include new player
         player_states = self.get_player_states(adventure_name)
@@ -141,7 +143,10 @@ class AdventureDataAccess(BaseDataAccess):
     def get_player(self, adventure_name: str, player_filename: str) -> Dict[str, Any]:
         """Get a specific player character"""
         player_path = os.path.join(get_adventure_path(adventure_name), "players", player_filename)
-        return self._load_yaml(player_path)
+        data = self._load_yaml(player_path)
+        # Add filename to returned data
+        data['filename'] = player_filename
+        return data
     
     def update_player(self, adventure_name: str, player_filename: str, data: Dict[str, Any]) -> Dict[str, Any]:
         """Update a player character"""

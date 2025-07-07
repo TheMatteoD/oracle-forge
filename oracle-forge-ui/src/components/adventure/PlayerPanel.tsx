@@ -16,8 +16,8 @@ export default function PlayerPanel() {
     refetch();
   };
 
-  const handleCharacterClick = (characterName: string) => {
-    navigate(`/character/${encodeURIComponent(characterName)}`);
+  const handleCharacterClick = (playerFilename: string) => {
+    navigate(`/character/${encodeURIComponent(playerFilename.replace(/\.yaml$/, ''))}`);
   };
 
   if (loadingActive || isLoading) {
@@ -40,7 +40,7 @@ export default function PlayerPanel() {
           players.map((player) => (
             <div key={player.name} className="border-b border-gray-600 pb-2 mb-2">
               <button
-                onClick={() => handleCharacterClick(player.name)}
+                onClick={() => handleCharacterClick(player.filename || player.name)}
                 className="text-left w-full hover:bg-gray-700 p-2 rounded transition-colors"
               >
                 <strong className="text-blue-400 hover:text-blue-300 cursor-pointer">
