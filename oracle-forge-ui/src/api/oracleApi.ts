@@ -4,7 +4,6 @@ import { createResponseTransformer } from './baseApi';
 
 export interface OracleTable {
   name: string;
-  // Add other fields as needed
 }
 
 export const oracleApi = createApi({
@@ -30,9 +29,12 @@ export const oracleApi = createApi({
         `/oracle/yesno/${system}${question ? `?question=${encodeURIComponent(question)}` : ''}`,
       transformResponse: createResponseTransformer<any>(),
     }),
-    sceneCheck: builder.query<any, { system: string; scene_context?: string }>({
-      query: ({ system, scene_context }) =>
-        `/oracle/scene/${system}${scene_context ? `?scene_context=${encodeURIComponent(scene_context)}` : ''}`,
+    sceneCheck: builder.mutation<any, { chaos?: number; flavor?: boolean }>({
+      query: (body) => ({
+        url: '/oracle/scene',
+        method: 'POST',
+        body,
+      }),
       transformResponse: createResponseTransformer<any>(),
     }),
     meaningOracle: builder.query<any, { system: string; focus?: string }>({
@@ -48,6 +50,6 @@ export const {
   useGetTableQuery,
   useRollTableQuery,
   useYesNoQuery,
-  useSceneCheckQuery,
   useMeaningOracleQuery,
+  useSceneCheckMutation,
 } = oracleApi; 
