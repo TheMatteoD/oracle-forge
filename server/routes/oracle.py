@@ -43,6 +43,7 @@ def oracle_yesno_flavor():
     return handle_service_response(result, "narration")
 
 @oracle.route("/oracle/scene", methods=["POST"])
+@validate_json_body()
 @validate_field("chaos", field_type=int, min_value=1, max_value=9, allow_none=True)
 @validate_field("flavor", field_type=bool, allow_none=True)
 def oracle_scene():
