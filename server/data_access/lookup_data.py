@@ -12,7 +12,7 @@ import os
 from typing import Dict, List, Optional, Any
 from pathlib import Path
 
-from .base import BaseDataAccess, DataAccessError, ValidationError
+from .base_data import BaseDataAccess, DataAccessError, ValidationError
 from ..utils.paths import (
     get_lookup_path,
     get_lookup_file_path,

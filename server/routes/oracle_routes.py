@@ -1,6 +1,6 @@
 from flask import Blueprint, request, g
 import logging
-from ..services.oracle import OracleService
+from ..services.oracle_service import OracleService
 from ..utils.responses import APIResponse, handle_service_response
 from ..utils.validation import validate_json_body, validate_field
 

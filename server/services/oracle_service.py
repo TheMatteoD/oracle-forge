@@ -12,7 +12,7 @@ This service contains business logic for oracle operations including:
 import logging
 from typing import Dict, List, Optional, Any
 
-from ..data_access import TableDataAccess, DataAccessError
+from ..data_access.tables_data import TableDataAccess, DataAccessError
 from scripts.oracle.oracle_driver import (
     handle_yes_no,
     handle_meaning,

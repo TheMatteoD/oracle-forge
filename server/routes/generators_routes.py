@@ -9,7 +9,7 @@ This module provides API endpoints for generator operations including:
 
 from flask import Blueprint, request, jsonify, g
 import logging
-from ..services.generator import GeneratorService
+from ..services.generator_service import GeneratorService
 from ..utils.responses import APIResponse, handle_service_response
 from ..utils.validation import validate_field, validate_json_body, validate_query_params
 

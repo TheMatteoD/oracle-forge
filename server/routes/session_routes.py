@@ -1,6 +1,6 @@
 from flask import Blueprint, request, g
 import logging
-from ..services.session import SessionService
+from ..services.session_service import SessionService
 from ..utils.responses import APIResponse, handle_service_response
 from ..utils.validation import validate_json_body, validate_field
 

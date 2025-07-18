@@ -14,7 +14,7 @@ from typing import Dict, List, Optional, Any
 from scripts.generators.registry import CUSTOM_GENERATORS
 from scripts.llm.flavoring import narrate_generation
 
-from ..data_access.tables import TableDataAccess, DataAccessError
+from ..data_access.tables_data import TableDataAccess, DataAccessError
 
 logger = logging.getLogger(__name__)
 

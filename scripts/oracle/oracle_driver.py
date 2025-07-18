@@ -3,7 +3,7 @@ from scripts.oracle.meanings import load_meaning_tables, roll_meaning
 from scripts.oracle.scene_test import scene_test
 from scripts.llm.flavoring import narrate_event_interrupt, narrate_keywords, narrate_yesno
 from scripts.adventure.context_builder import build_adventure_context
-from server.services.session import SessionService
+from server.services.session_service import SessionService
 
 # Create a service instance for use in this module
 _session_service = SessionService()

@@ -13,7 +13,7 @@ import logging
 from typing import Dict, List, Optional, Any
 from pathlib import Path
 
-from ..data_access import AdventureDataAccess, DataAccessError
+from ..data_access.adventure_data import AdventureDataAccess, DataAccessError
 from ..config import get_config
 from ..utils.paths import get_adventure_path
 

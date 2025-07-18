@@ -1,7 +1,7 @@
 from flask import Blueprint, send_from_directory, request, send_file, g
 import os
 from werkzeug.utils import secure_filename
-from ..services.adventure import AdventureService
+from ..services.adventure_service import AdventureService
 from ..config import get_config
 from ..utils.responses import APIResponse, handle_service_response
 from ..utils.validation import validate_json_body, validate_field

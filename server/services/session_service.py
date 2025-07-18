@@ -14,7 +14,7 @@ import re
 from typing import Dict, List, Optional, Any
 from datetime import datetime
 
-from ..data_access import AdventureDataAccess, DataAccessError
+from ..data_access.adventure_data import AdventureDataAccess, DataAccessError
 from scripts.llm.flavoring import summarize_session_log_llm
 
 logger = logging.getLogger(__name__)

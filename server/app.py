@@ -1,16 +1,16 @@
 import logging
 from flask import Flask
 from flask_cors import CORS
-from .routes.oracle import oracle
-from .routes.lookup import lookup
-from .routes.adventure import adventure
-from .routes.generators import generators
-from .routes.combat import combat_bp
-from .routes.session import session
+from .routes.oracle_routes import oracle
+from .routes.lookup_routes import lookup
+from .routes.adventure_routes import adventure
+from .routes.generators_routes import generators
+from .routes.combat_routes import combat_bp
+from .routes.session_routes import session
 from .config import get_config, config_manager
 from .middleware.error_handlers import register_error_handlers
 from .middleware.rate_limiting import register_rate_limiting
-from .services.adventure import AdventureService
+from .services.adventure_service import AdventureService
 
 # Configure logging
 logging.basicConfig(

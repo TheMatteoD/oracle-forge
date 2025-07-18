@@ -11,7 +11,7 @@ This service contains business logic for lookup operations including:
 import logging
 from typing import Dict, List, Optional, Any
 
-from ..data_access import LookupDataAccess, DataAccessError
+from ..data_access.lookup_data import LookupDataAccess, DataAccessError
 from scripts.llm.flavoring import narrate_items, narrate_monsters, narrate_spells, rewrite_narration
 
 logger = logging.getLogger(__name__)

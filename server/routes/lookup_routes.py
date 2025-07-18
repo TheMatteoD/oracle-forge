@@ -1,7 +1,7 @@
 # server/routes/lookup.py
 from flask import Blueprint, request, g
 import logging
-from ..services.lookup import LookupService
+from ..services.lookup_service import LookupService
 from ..utils.responses import APIResponse, handle_service_response
 from ..utils.validation import validate_json_body, validate_field, validate_enum_field
 

@@ -13,7 +13,7 @@ import logging
 from typing import Dict, List, Optional, Any
 from pathlib import Path
 
-from .base import BaseDataAccess, DataAccessError, ValidationError
+from .base_data import BaseDataAccess, DataAccessError, ValidationError
 from ..utils.paths import (
     get_rules_path,
 )
