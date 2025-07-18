@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useSceneCheckMutation } from '../../api/oracleApi';
+import { useAppendSessionLogMutation } from '../../api/sessionApi';
 
 interface SceneCheckProps {
   chaos: number;
@@ -35,6 +36,7 @@ export default function SceneCheck({ chaos }: SceneCheckProps) {
   const [logSaving, setLogSaving] = useState(false);
 
   const [sceneCheck, { data, error, isLoading }] = useSceneCheckMutation();
+  const [appendLog, { isLoading: isLogSaving }] = useAppendSessionLogMutation();
 
   React.useEffect(() => {
     if (data) {
@@ -82,18 +84,9 @@ export default function SceneCheck({ chaos }: SceneCheckProps) {
     setLogSaving(true);
     setLogError(null);
     try {
-      const response = await fetch('/session/log', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ content: text, type: 'oracle' })
-      });
-      const data = await response.json();
-      if (data.success) {
-        setShowLogModal(false);
-      } else {
-        setLogError('Failed to save log.');
-      }
-    } catch {
+      await appendLog({ content: text, type: 'oracle' }).unwrap();
+      setShowLogModal(false);
+    } catch (e) {
       setLogError('Failed to save log.');
     } finally {
       setLogSaving(false);
@@ -147,7 +140,7 @@ export default function SceneCheck({ chaos }: SceneCheckProps) {
         onClose={() => setShowLogModal(false)}
         logText={logText}
         onSave={handleSaveLog}
-        saving={logSaving}
+        saving={logSaving || isLogSaving}
         error={logError}
       />
     </section>
